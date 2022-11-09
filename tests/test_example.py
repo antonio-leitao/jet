@@ -1,3 +1,8 @@
+def test_username(username):
+    print("this")
+    assert username == "Mike Wazowski"
+
+
 def test_arrays():
     """Checks differences between arrays"""
     a = ["banana", "book", "apple"]

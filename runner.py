@@ -66,13 +66,6 @@ def get_routines(module):
     return routines
 
 
-# for module in get_modules():
-#     mod_name = os.path.split(module)[-1]
-#     print("NAME:", mod_name.removesuffix(".py").removeprefix("test_"))
-#     for routine in get_routines(module):
-#         print(routine.__name__)
-
-
 def clean_module_name(module):
     mod_name = os.path.split(module)[-1].removesuffix(".py").removeprefix("test_")
     mod_name = mod_name.split("_")
@@ -80,6 +73,8 @@ def clean_module_name(module):
     return mod_name.capitalize()
 
 
-test = "/Users/antonio/Documents/Projects/NAU_NauTesting/tests/test_array_operations.py"
-
-print(clean_module_name(test))
+for module in get_modules():
+    mod_name = clean_module_name(module)
+    print(mod_name)
+    for routine in get_routines(module):
+        print(routine.__name__)
