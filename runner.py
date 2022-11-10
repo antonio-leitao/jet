@@ -6,6 +6,12 @@ import os
 import inspect
 import importlib.util
 import sys
+import subprocess
+import traceback
+import warnings
+import json
+
+warnings.filterwarnings("error")
 
 
 class ErrorDuringImport(Exception):
@@ -39,42 +45,137 @@ def _importfile(path):
         raise ErrorDuringImport(path, sys.exc_info())
 
 
-def get_modules(path=None):
-    if path is None:
-        path = os.getcwd() + "/tests"
-    mods = []
-    for dirpath, subdirs, files in os.walk(path):
-        for x in files:
-            if x.endswith(".py") and x.startswith("test_"):
-                mods.append(os.path.join(dirpath, x))
-    return mods
-
-
-# COLLECT EVERYTHING FIRST IN ORDER TO BE ABLE TO RUN A PROGRESS BAR
-
-
-def get_routines(module):
-    routines = []
-    object = _importfile(module)
-    for key, value in inspect.getmembers(object, inspect.isroutine):
-        if key.startswith("test"):
-            routines.append(value)
-        # print("KEY: ", value.__name__)
-        # print("DOC: ", value.__doc__)
-        # print("------")
-        # run test and log all stuff (maybe its gonna be necessary)
-    return routines
-
-
-def clean_module_name(module):
-    mod_name = os.path.split(module)[-1].removesuffix(".py").removeprefix("test_")
+def _clean_name(path):
+    mod_name = os.path.split(path)[-1].removesuffix(".py").removeprefix("test_")
     mod_name = mod_name.split("_")
     mod_name = " ".join(mod_name)
     return mod_name.capitalize()
 
 
-for module in get_modules():
-    mod_name = clean_module_name(module)
-    print(mod_name)
-    for routine in get_routines(module):
-        print(routine.__name__)
+# path comes in -> module path, name, description and module
+def _get_data(path):
+    module = _importfile(path)
+    name = _clean_name(path)
+    data = {"doc": module.__doc__, "path": path, "module": module}
+    return name, data
+
+
+def _catch(exc):
+    """type, descriptiom, place"""
+    t = type(exc).__name__
+    d = str(exc)
+    x = traceback.format_exc()
+    p = [i.replace("  ", "") for i in x.split("\n") if i][-2]
+    return t, d, p
+
+
+# module comes in -> iterate through function
+
+
+class Runner:
+    def __init__(self):
+        self.modules = {}
+
+    def get_modules(self, path=None):
+        if path is None:
+            path = os.getcwd() + "/tests"
+        for dirpath, subdirs, files in os.walk(path):
+            for x in files:
+                if x.endswith(".py") and x.startswith("test_"):
+                    name, data = _get_data(os.path.join(dirpath, x))
+                    self.modules[name] = data
+
+    def choose_modules(self):
+        self.get_modules()
+        print("Which modules to run?")
+        result = subprocess.run(
+            ["gum", "choose", "--no-limit", "All"] + list(self.modules.keys()),
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+        return result.stdout.splitlines()
+
+    def fetch_modules(self):
+        choices = self.choose_modules()
+        if "All" in choices:
+            return
+        self.modules = {k: v for k, v in self.modules.items() if k in choices}
+        return
+
+    def fetch_module_routines(self, module, module_name):
+        routines = []
+        for key, value in inspect.getmembers(module, inspect.isroutine):
+            if key.startswith("test"):
+                routine_data = {
+                    "routine": value,
+                    "name": _clean_name(value.__name__),
+                    "doc": value.__doc__ if value.__doc__ is not None else "",
+                    "module": module_name,
+                }
+                routines.append(routine_data)
+        return routines
+
+    def fetch_tests(self):
+        self.fetch_modules()
+        tests = []
+        for module_name in self.modules.keys():
+            routines = self.fetch_module_routines(
+                self.modules[module_name]["module"], module_name
+            )
+            tests.extend(routines)
+        return tests
+
+    def archive_routine_results(self, routine, result, details):
+        test_result = {k: v for k, v in routine.items() if k != "routine"}
+        test_result["result"] = result
+        test_result["diagnosis"] = {
+            "type": details[0],
+            "place": details[1],
+            "description": details[2],
+        }
+        self.results["tests"].append(test_result)
+
+    def dump_results(self, path="result.json"):
+        with open(path, "w") as fp:
+            json.dump(self.results, fp)
+
+    def run_tests(self):
+        tests = self.fetch_tests()
+        n_tests = len(tests)
+        self.results = {
+            "summary": {
+                "n_tests": n_tests,
+                "Pass": 0,
+                "Failed": 0,
+                "Warning": 0,
+                "Error": 0,
+            },
+            "tests": [],
+        }
+
+        for routine in tests:  ####HERE IS WHERE I put the progress bar
+            # verbose with some extent
+            result, details = self.evaluate(routine["routine"])
+            self.results["summary"][result] += 1
+            if result == "Pass":
+                continue
+            self.archive_routine_results(routine, result, details)
+        self.dump_results()
+
+    def evaluate(self, routine):
+        try:
+            routine()
+            return "Pass", []
+        except AssertionError as exc:
+            t, d, p = _catch(exc)
+            return "Failed", [t, d, p]
+        except RuntimeWarning as exc:
+            t, d, p = _catch(exc)
+            return "Warning", [t, d, p]
+        except Exception as exc:
+            t, d, p = _catch(exc)
+            return "Error", [t, d, p]
+
+
+if __name__ == "__main__":
+    runner = Runner().run_tests()
