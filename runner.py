@@ -62,11 +62,13 @@ def _get_data(path):
 
 def _catch(exc):
     """type, descriptiom, place"""
-    t = type(exc).__name__
-    d = str(exc)
     x = traceback.format_exc()
-    p = [i.replace("  ", "") for i in x.split("\n") if i][-2]
-    return t, d, p
+    details = {
+        "type": type(exc).__name__,
+        "description": str(exc),
+        "place": [i.replace("  ", "") for i in x.split("\n") if i][-2],
+    }
+    return details
 
 
 # module comes in -> iterate through function
@@ -128,16 +130,23 @@ class Runner:
     def archive_routine_results(self, routine, result, details):
         test_result = {k: v for k, v in routine.items() if k != "routine"}
         test_result["result"] = result
-        test_result["diagnosis"] = {
-            "type": details[0],
-            "place": details[1],
-            "description": details[2],
-        }
+        test_result["diagnosis"] = details
         self.results["tests"].append(test_result)
 
     def dump_results(self, path="result.json"):
         with open(path, "w") as fp:
             json.dump(self.results, fp)
+
+    def evaluate(self, routine):
+        try:
+            routine()
+            return "Pass", []
+        except AssertionError as exc:
+            return "Failed", _catch(exc)
+        except RuntimeWarning as exc:
+            return "Warning", _catch(exc)
+        except Exception as exc:
+            return "Error", _catch(exc)
 
     def run_tests(self):
         tests = self.fetch_tests()
@@ -161,20 +170,6 @@ class Runner:
                 continue
             self.archive_routine_results(routine, result, details)
         self.dump_results()
-
-    def evaluate(self, routine):
-        try:
-            routine()
-            return "Pass", []
-        except AssertionError as exc:
-            t, d, p = _catch(exc)
-            return "Failed", [t, d, p]
-        except RuntimeWarning as exc:
-            t, d, p = _catch(exc)
-            return "Warning", [t, d, p]
-        except Exception as exc:
-            t, d, p = _catch(exc)
-            return "Error", [t, d, p]
 
 
 if __name__ == "__main__":

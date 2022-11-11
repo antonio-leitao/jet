@@ -1,2 +1,2 @@
 def test_print_function():
-    print("thi thing was run")
+    print("this is the standard output of a function")
