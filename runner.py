@@ -10,6 +10,11 @@ import subprocess
 import traceback
 import warnings
 import json
+from tqdm import tqdm
+import time
+import io
+from contextlib import redirect_stdout
+
 
 warnings.filterwarnings("error")
 
@@ -60,13 +65,15 @@ def _get_data(path):
     return name, data
 
 
-def _catch(exc):
+def _catch(exc, f):
     """type, descriptiom, place"""
+    out = f.getvalue()
     x = traceback.format_exc()
     details = {
         "type": type(exc).__name__,
         "description": str(exc),
         "place": [i.replace("  ", "") for i in x.split("\n") if i][-2],
+        "output": out,
     }
     return details
 
@@ -77,6 +84,14 @@ def _catch(exc):
 class Runner:
     def __init__(self):
         self.modules = {}
+        self.verbose = 1
+        self.colors = {
+            "Pass": "\033[92m",
+            "Failed": "\033[91m",
+            "Warning": "\033[0m",
+            "Error": "\033[93m",
+            "End": "\033[0m",
+        }
 
     def get_modules(self, path=None):
         if path is None:
@@ -138,15 +153,17 @@ class Runner:
             json.dump(self.results, fp)
 
     def evaluate(self, routine):
+        f = io.StringIO()
         try:
-            routine()
+            with redirect_stdout(f):
+                routine()
             return "Pass", []
         except AssertionError as exc:
-            return "Failed", _catch(exc)
+            return "Failed", _catch(exc, f)
         except RuntimeWarning as exc:
-            return "Warning", _catch(exc)
+            return "Warning", _catch(exc, f)
         except Exception as exc:
-            return "Error", _catch(exc)
+            return "Error", _catch(exc, f)
 
     def run_tests(self):
         tests = self.fetch_tests()
@@ -162,14 +179,63 @@ class Runner:
             "tests": [],
         }
 
-        for routine in tests:  ####HERE IS WHERE I put the progress bar
-            # verbose with some extent
-            result, details = self.evaluate(routine["routine"])
-            self.results["summary"][result] += 1
-            if result == "Pass":
-                continue
-            self.archive_routine_results(routine, result, details)
+        progress_bar = tqdm(
+            tests,
+            bar_format="{l_bar}{bar:50}| {n_fmt}/{total_fmt}",
+            leave=False,
+            position=0,
+            colour="#E01563",
+            postfix="",
+        )
+
+        with tqdm(
+            total=n_tests, position=1, bar_format="{desc}", desc="All tests passed!"
+        ) as desc:
+
+            for routine in progress_bar:
+                # verbose with some extent
+                result, details = self.evaluate(routine["routine"])
+                self.results["summary"][result] += 1
+
+                # srchive only errors, warning and fails
+                if result != "Pass":
+                    self.archive_routine_results(routine, result, details)
+
+                # VERBOSE
+                # 1
+                desc.set_description(self.verbose_one())
+                # 2
+                progress_bar.write(self.verbose_two(result, routine["routine"]))
+                time.sleep(1)
+
         self.dump_results()
+
+    def verbose_one(self):
+        s = "Summary: "
+        for result in ["Pass", "Failed", "Warning", "Error"]:
+            n = self.results["summary"][result]
+            if n == 0:
+                continue
+            s += f"{self.colors[result]}{str(n)} {result.lower()}{self.colors['End']}, "
+        return s[:-2]
+
+    def verbose_two(self, result, routine):
+
+        doc = routine.__doc__
+        if doc is None:
+            doc = _clean_name(routine.__name__)
+
+        if result == "Pass":
+            tick = "\u2713"
+            return f"{self.colors['Pass']}{tick} {self.colors['End']}{doc}"
+
+        if result == "Failed":
+            cross = "\u2717"
+            return f"{self.colors['Failed']}{cross} {self.colors['End']}{doc}"
+
+        else:
+            mark = "?"
+            return f"{self.colors['Error']}{mark} {self.colors['End']}{doc}"
 
 
 if __name__ == "__main__":

@@ -10,8 +10,8 @@ progress_bar = tqdm(
     leave=False,
     position=0,
     colour="#E01563",
+    postfix="",
 )
-progress_bar.set_postfix(f"")
 
 
 # print('\n')
@@ -23,8 +23,8 @@ with tqdm(total=5, position=1, bar_format="{desc}", desc="All tests passed!") as
 
         # progress_bar.write(f"Test: {i} [PASSED]") #verbose option
         time.sleep(1)
-    
+
 
 var = 3
-another=5
-print(3+5)
+another = 5
+print(3 + 5)
