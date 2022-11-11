@@ -13,6 +13,7 @@ import json
 from tqdm import tqdm
 import io
 from contextlib import redirect_stdout
+import textwrap
 
 
 warnings.filterwarnings("error")
@@ -98,11 +99,41 @@ class Runner:
                     name, data = _get_data(os.path.join(dirpath, x))
                     self.modules[name] = data
 
+    def format_option(self, name, desc=None, max_length=200, line_width=60):
+        name = f"\033[1m{name}\033[0m"
+        if desc is None:
+            return name
+        if len(desc) == 0:
+            return name
+        # drop new lines
+        desc = desc.replace("\n", " ")
+        # truncate
+        if len(desc) > max_length - 3:
+            desc = desc[:max_length] + "..."
+        # justify
+        desc = textwrap.fill(desc, line_width)
+        # add indentation
+        desc = textwrap.indent(desc, "    ")
+
+        return f"\033[1m{name}\033[0m\n{desc}"
+
     def choose_modules(self):
         self.get_modules()
+        options = [self.format_option(k, v["doc"]) for k, v in self.modules.items()]
+
         print("Which modules to run?")
         result = subprocess.run(
-            ["gum", "choose", "--no-limit", "All"] + list(self.modules.keys()),
+            [
+                "gum",
+                "choose",
+                "--no-limit",
+                "--cursor.foreground",
+                "#E01563",
+                "--selected.foreground",
+                "#E01563",
+                self.format_option("All"),
+            ]
+            + options,  # [list(self.modules.keys())],
             stdout=subprocess.PIPE,
             text=True,
         )
@@ -184,9 +215,7 @@ class Runner:
             postfix="",
         )
 
-        with tqdm(
-            total=n_tests, position=1, bar_format="{desc}", desc="All tests passed!"
-        ) as desc:
+        with tqdm(total=n_tests, position=1, bar_format="{desc}", desc="") as desc:
 
             for routine in progress_bar:
                 # verbose with some extent
