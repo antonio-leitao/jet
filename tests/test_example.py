@@ -27,3 +27,10 @@ def test_this_other_thing():
 def test_pass():
     """Should always pass under these configurations"""
     pass
+
+
+def test_standard_output():
+    """This function should always fail and has standard output"""
+
+    print("this is a standard output")
+    assert 1 == 2

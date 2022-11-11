@@ -11,7 +11,6 @@ import traceback
 import warnings
 import json
 from tqdm import tqdm
-import time
 import io
 from contextlib import redirect_stdout
 
@@ -66,7 +65,7 @@ def _get_data(path):
 
 
 def _catch(exc, f):
-    """type, descriptiom, place"""
+    """type, descriptiom, place, output"""
     out = f.getvalue()
     x = traceback.format_exc()
     details = {
@@ -78,13 +77,10 @@ def _catch(exc, f):
     return details
 
 
-# module comes in -> iterate through function
-
-
 class Runner:
     def __init__(self):
         self.modules = {}
-        self.verbose = 1
+        self.verbose = 2
         self.colors = {
             "Pass": "\033[92m",
             "Failed": "\033[91m",
@@ -202,11 +198,10 @@ class Runner:
                     self.archive_routine_results(routine, result, details)
 
                 # VERBOSE
-                # 1
-                desc.set_description(self.verbose_one())
-                # 2
-                progress_bar.write(self.verbose_two(result, routine["routine"]))
-                time.sleep(1)
+                if self.verbose > 0:
+                    desc.set_description(self.verbose_one())
+                if self.verbose > 1:
+                    progress_bar.write(self.verbose_two(result, routine["routine"]))
 
         self.dump_results()
 
