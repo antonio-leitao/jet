@@ -14,6 +14,7 @@ from tqdm import tqdm
 import io
 from contextlib import redirect_stdout
 import textwrap
+import time
 
 
 warnings.filterwarnings("error")
@@ -83,12 +84,14 @@ class Runner:
         self.modules = {}
         self.verbose = 2
         self.colors = {
-            "Pass": "\033[92m",
-            "Failed": "\033[91m",
+            "Pass": "\033[38;2;69;133;136m",  # 92m
+            "Failed": "\033[38;2;204;36;29m",
             "Warning": "\033[0m",
-            "Error": "\033[93m",
+            "Error": "\033[38;2;250;189;47m",
             "End": "\033[0m",
         }
+        self.indentation = "    "
+        self.main_color = "#458588"
 
     def get_modules(self, path=None):
         if path is None:
@@ -100,7 +103,6 @@ class Runner:
                     self.modules[name] = data
 
     def format_option(self, name, desc=None, max_length=200, line_width=60):
-        name = f"\033[1m{name}\033[0m"
         if desc is None:
             return name
         if len(desc) == 0:
@@ -113,9 +115,9 @@ class Runner:
         # justify
         desc = textwrap.fill(desc, line_width)
         # add indentation
-        desc = textwrap.indent(desc, "    ")
+        desc = textwrap.indent(desc, self.indentation)
 
-        return f"\033[1m{name}\033[0m\n{desc}"
+        return f"{name}\n\033[3m{desc}\033[0m"
 
     def choose_modules(self):
         self.get_modules()
@@ -128,16 +130,22 @@ class Runner:
                 "choose",
                 "--no-limit",
                 "--cursor.foreground",
-                "#E01563",
+                self.main_color,  # 2274A5
                 "--selected.foreground",
-                "#E01563",
+                self.main_color,
                 self.format_option("All"),
             ]
             + options,  # [list(self.modules.keys())],
             stdout=subprocess.PIPE,
             text=True,
         )
-        return result.stdout.splitlines()
+
+        choices = self.unformat_option(result.stdout.splitlines())
+        return choices
+
+    def unformat_option(self, choice_list):
+        choices = [s.split(self.indentation)[0] for s in choice_list]
+        return choices
 
     def fetch_modules(self):
         choices = self.choose_modules()
@@ -211,7 +219,7 @@ class Runner:
             bar_format="{l_bar}{bar:50}| {n_fmt}/{total_fmt}",
             leave=False,
             position=0,
-            colour="#E01563",
+            colour=self.main_color,
             postfix="",
         )
 
@@ -231,6 +239,7 @@ class Runner:
                     desc.set_description(self.verbose_one())
                 if self.verbose > 1:
                     progress_bar.write(self.verbose_two(result, routine["routine"]))
+                time.sleep(1)
 
         self.dump_results()
 
