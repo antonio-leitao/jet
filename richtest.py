@@ -2,6 +2,7 @@ import subprocess
 import textwrap
 
 indentation = "    "
+color = ""
 
 modules = [
     {"title": "Raspberry Pi’s", "desc": "I have ’em all over my house"},
@@ -62,9 +63,9 @@ result = subprocess.run(
         "choose",
         "--no-limit",
         "--cursor.foreground",
-        "38",  # 2274A5
+        color,  # 2274A5
         "--selected.foreground",
-        "38",
+        color,
         "--unselected-prefix",
         "[ ] ",
         "--cursor-prefix",
