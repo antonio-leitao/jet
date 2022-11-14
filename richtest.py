@@ -2,7 +2,7 @@ import subprocess
 import textwrap
 
 indentation = "    "
-color = ""
+color = ""  # 38 is best
 
 modules = [
     {"title": "Raspberry Pi’s", "desc": "I have ’em all over my house"},
@@ -73,9 +73,12 @@ result = subprocess.run(
         "--selected-prefix",
         "[\u2713] ",
     ]
-    + [prep_module(mod) for mod in modules],  # [list(self.modules.keys())],
+    + [prep_module(mod) for mod in modules],
+      # [list(self.modules.keys())],
     stdout=subprocess.PIPE,
     text=True,
 )
 
-print(result.stdout.splitlines()[::2])
+subprocess.run(["printf '\33[2A[2K\r'"], shell=True) ###erases n lines where n is [nA[
+
+#print(result.stdout.splitlines()[::2])
