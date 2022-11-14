@@ -2,9 +2,10 @@ import subprocess
 import textwrap
 
 indentation = "    "
-color = ""  # 38 is best
+color = "38"  # 38 is best
 
 modules = [
+    {"title": "ALL", "desc": "Run all found in the tests folder"},
     {"title": "Raspberry Pi’s", "desc": "I have ’em all over my house"},
     {"title": "Nutella", "desc": "It's good on toast"},
     {"title": "Bitter melon", "desc": "It cools you down"},

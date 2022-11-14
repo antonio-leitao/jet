@@ -15,6 +15,7 @@ import io
 from contextlib import redirect_stdout
 import textwrap
 import time
+from rich.progress import Progress
 
 
 warnings.filterwarnings("error")
@@ -84,11 +85,10 @@ class Runner:
         self.modules = {}
         self.verbose = 2
         self.colors = {
-            "Pass": "\033[38;2;69;133;136m",  # 92m
-            "Failed": "\033[38;2;204;36;29m",
-            "Warning": "\033[0m",
-            "Error": "\033[38;2;250;189;47m",
-            "End": "\033[0m",
+            "Pass": "green",  # 92m
+            "Failed": "red",
+            "Warning": "yellow",
+            "Error": "gray23",
         }
         self.indentation = "    "
         self.main_color = "#458588"
@@ -214,18 +214,9 @@ class Runner:
             "tests": [],
         }
 
-        progress_bar = tqdm(
-            tests,
-            bar_format="{l_bar}{bar:50}| {n_fmt}/{total_fmt}",
-            leave=False,
-            position=0,
-            colour=self.main_color,
-            postfix="",
-        )
-
-        with tqdm(total=n_tests, position=1, bar_format="{desc}", desc="") as desc:
-
-            for routine in progress_bar:
+        with Progress() as progress:
+            task = progress.add_task("Running tests", total=n_tests)
+            for routine in tests:
                 # verbose with some extent
                 result, details = self.evaluate(routine["routine"])
                 self.results["summary"][result] += 1
@@ -234,13 +225,13 @@ class Runner:
                 if result != "Pass":
                     self.archive_routine_results(routine, result, details)
 
-                # VERBOSE
-                if self.verbose > 0:
-                    desc.set_description(self.verbose_one())
                 if self.verbose > 1:
-                    progress_bar.write(self.verbose_two(result, routine["routine"]))
-                time.sleep(1)
+                    progress.console.print(self.verbose_two(result, routine["routine"]))
+                time.sleep(0.2)
+                progress.advance(task)
+            progress.console.print(self.verbose_one())
 
+        subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()
 
     def verbose_one(self):
@@ -249,26 +240,26 @@ class Runner:
             n = self.results["summary"][result]
             if n == 0:
                 continue
-            s += f"{self.colors[result]}{str(n)} {result.lower()}{self.colors['End']}, "
+            s += f"[{self.colors[result]}]{str(n)} {result.lower()}[/{self.colors[result]}], "
         return s[:-2]
 
     def verbose_two(self, result, routine):
-
+        # TODO change color names to init
         doc = routine.__doc__
         if doc is None:
             doc = _clean_name(routine.__name__)
 
         if result == "Pass":
             tick = "\u2713"
-            return f"{self.colors['Pass']}{tick} {self.colors['End']}{doc}"
+            return f"[{self.colors['Pass']}]{tick}[/{self.colors['Pass']}] {doc}"
 
         if result == "Failed":
             cross = "\u2717"
-            return f"{self.colors['Failed']}{cross} {self.colors['End']}{doc}"
+            return f"[{self.colors['Failed']}]{cross}[/{self.colors['Failed']}] {doc}"
 
         else:
             mark = "?"
-            return f"{self.colors['Error']}{mark} {self.colors['End']}{doc}"
+            return f"[{self.colors['Warning']}]{mark}[/{self.colors['Warning']}] {doc}"
 
 
 if __name__ == "__main__":
