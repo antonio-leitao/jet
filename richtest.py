@@ -56,7 +56,28 @@ def prep_module(mod):
     return title + desc
 
 
-print("Which modules to run?\n")
+# print("Which modules to run?\n")
+subprocess.run(
+    [
+        "gum",
+        "style",
+        "--background",
+        "31",
+        "--margin",
+        "0 4",
+        "Choose Modules to Run",
+    ]
+)
+subprocess.run(
+    [
+        "gum",
+        "style",
+        "--faint",
+        "--margin",
+        "1 4",
+        f"Found {len(modules)} modules",
+    ]
+)
 result = subprocess.run(
     [
         "gum",
@@ -74,11 +95,11 @@ result = subprocess.run(
         "[\u2713] ",
     ]
     + [prep_module(mod) for mod in modules],
-      # [list(self.modules.keys())],
+    # [list(self.modules.keys())],
     stdout=subprocess.PIPE,
     text=True,
 )
 
-subprocess.run(["printf '\33[2A[2K\r'"], shell=True) ###erases n lines where n is [nA[
+subprocess.run(["printf '\33[4A[2K\r'"], shell=True)  ###erases n lines where n is [nA[
 
-#print(result.stdout.splitlines()[::2])
+# print(result.stdout.splitlines()[::2])
