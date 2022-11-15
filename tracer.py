@@ -3,7 +3,7 @@ from runner import Runner
 import subprocess
 
 
-routines = Runner().fetch_tests()
+routines = Runner(accent_color="134").fetch_tests()
 
 
 console = Console()
@@ -26,15 +26,10 @@ for routine in routines:
 # print(results.keys())
 # print(results["test_arrays"])
 
-import csv
-
-with open("results_cache.csv", "w") as csv_file:
-    writer = csv.writer(csv_file)
-    cols = list(routines[0].keys())
-    writer.writerow(cols)
-    for routine in routines:
-        writer.writerow([str(routine[k]) for k in cols])
-
+cols = list(routines[0].keys())
+online_csv = ",".join(cols) + "\n"
+for routine in routines:
+    online_csv += ",".join([str(routine[k]) for k in cols]) + "\n"
 subprocess.run(
     [
         "gum",
@@ -43,19 +38,17 @@ subprocess.run(
         "select for more details q to quit",
     ]
 )
+
+
 selected = subprocess.run(
-    [
-        f"gum",
-        "table",
-        "--widths",
-        "20,20,20,20",
-        "--file",
-        "results_cache.csv",
-    ],
+    [f"gum table <<< '{online_csv}' --widths '20,20,20,20'"],
     stdout=subprocess.PIPE,
     text=True,
+    shell=True,
 )
 # Erase Header
-subprocess.run(["printf '\33[A[2K\r'"], shell=True)
+# subprocess.run(["printf '\33[A[2K\r'"], shell=True)
 
-print(selected.stdout.split(",")[1])
+# print(selected.stdout.split(",")[1])
+
+#results["tests"]["name"/"doc"/"module"]["diagnosis"]
