@@ -47,7 +47,6 @@ def prep_module(mod, indentation, max_length=200, line_width=60):
     title = subprocess.run(
         ["gum", "style", mod["title"]], stdout=subprocess.PIPE
     ).stdout
-
     desc = subprocess.run(
         [
             "gum",
@@ -68,8 +67,7 @@ def prep_module(mod, indentation, max_length=200, line_width=60):
 def choose_modules(
     modules, color="38", indentation="      ", max_length=200, line_width=60
 ):
-
-    # print("Which modules to run?\n")
+    subprocess.run(["echo"])
     subprocess.run(
         [
             "gum",
@@ -82,6 +80,7 @@ def choose_modules(
             " Choose Modules ",
         ]
     )
+
     subprocess.run(
         [
             "gum",
@@ -118,6 +117,7 @@ def choose_modules(
     )
 
     ###erases n lines where n is [nA[
-    subprocess.run(["printf '\33[4A[2K\r'"], shell=True)
-
+    # subprocess.run(["printf '\33[4A[2K\r'"], shell=True)  # 4A2K
+    subprocess.run(["printf '\33[5A'"], shell=True)  # moves cursor 5 lines up
+    subprocess.run(["printf '\33[J\r'"], shell=True)  # deletes everything to bottom
     return result.stdout.splitlines()[::2]
