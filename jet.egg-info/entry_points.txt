@@ -1,0 +1,2 @@
+[console_scripts]
+jet = jet.jet:jet

@@ -14,7 +14,7 @@ import io
 from contextlib import redirect_stdout
 import time
 from rich.progress import Progress
-from richtest import choose_modules
+from jet_selection import choose_modules
 from rich.console import Console
 from functools import reduce
 from operator import getitem

@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: jet
+Version: 0.0.1
+Summary: Simple clean testing toolkit
+Home-page: https://github.com/Antonio-Leitao/jet
+Author: Antonio Leitao
+Author-email: aleitao@novaims.unl.pt
+Description-Content-Type: text/markdown
+
+### Todo
+-> Add footer (takes keys and displays them into columns)
+-> Super 
+
+The package requires gum to run!

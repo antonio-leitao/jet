@@ -3,7 +3,7 @@ from jet.runner import Runner
 from doctor import doctor, JetError
 
 
-def jet():
+def main():
     """JET simple clean minimalistic testing library.
     Testing library or python with emphasis on presentation and minimalism
     """
@@ -43,4 +43,4 @@ def jet():
 
 if __name__ == "__main__":
     # main(sys.argv[1])
-    jet()
+    main()
