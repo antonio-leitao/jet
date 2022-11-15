@@ -82,7 +82,7 @@ def _catch(exc, f):
 
 
 class Runner:
-    def __init__(self):
+    def __init__(self, accent_color="38"):
         self.modules = {}
         self.verbose = 2
         self.colors = {
@@ -92,7 +92,7 @@ class Runner:
             "Error": "gray23",
         }
         self.indentation = "    "
-        self.main_color = "#458588"
+        self.accent_color = accent_color
 
     def get_modules(self, path=None):
         if path is None:
@@ -107,7 +107,7 @@ class Runner:
         self.get_modules()
         options = [{"title": k, "desc": v["doc"]} for k, v in self.modules.items()]
         options.insert(0, {"title": "Run All", "desc": "Run all test modules found."})
-        return choose_modules(options)
+        return choose_modules(options, color=self.accent_color)
 
     def fetch_modules(self):
         choices = self.prompt_module_choice()
@@ -225,4 +225,4 @@ class Runner:
 
 
 if __name__ == "__main__":
-    runner = Runner().run_tests()
+    runner = Runner(accent_color="134").run_tests()  # 99!

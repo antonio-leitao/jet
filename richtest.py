@@ -75,7 +75,7 @@ def choose_modules(
             "gum",
             "style",
             "--background",
-            "161",
+            "53",  # 161
             "--margin",
             "0 4",
             "--bold",
