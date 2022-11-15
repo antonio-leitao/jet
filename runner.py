@@ -20,14 +20,6 @@ from functools import reduce
 from operator import getitem
 import re
 
-
-def _getitem(d, key):
-    try:
-        return reduce(getitem, key, d)
-    except KeyError:
-        return ""
-
-
 warnings.filterwarnings("error")
 
 
@@ -41,6 +33,13 @@ class ErrorDuringImport(Exception):
     def __str__(self):
         exc = self.exc.__name__
         return "problem in %s - %s: %s" % (self.filename, exc, self.value)
+
+
+def _getitem(d, key):
+    try:
+        return reduce(getitem, key, d)
+    except KeyError:
+        return ""
 
 
 def _importfile(path):
@@ -278,7 +277,3 @@ class Runner:
         else:
             mark = "?"
             return f"[{self.colors['Warning']}]{mark}[/{self.colors['Warning']}] {doc}"
-
-
-if __name__ == "__main__":
-    runner = Runner(accent_color="134").run_tests()  # 99!
