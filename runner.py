@@ -103,10 +103,11 @@ class Runner:
         self.indentation = "    "
         self.accent_color = accent_color
         self.console = Console()
+        self.default_directory = os.getcwd() + "/tests"
 
     def get_modules(self, path=None):
         if path is None:
-            path = os.getcwd() + "/tests"
+            path = self.default_directory
         for dirpath, subdirs, files in os.walk(path):
             for x in files:
                 if x.endswith(".py") and x.startswith("test_"):
@@ -155,7 +156,7 @@ class Runner:
         test_result["diagnosis"] = details
         self.results["tests"].append(test_result)
 
-    def dump_results(self, path="result.json"):
+    def dump_results(self):
         cols = ["Name", "Result", "Diagnosis"]
         keys = [
             ["name"],
@@ -167,36 +168,14 @@ class Runner:
         for test in self.results["tests"]:
             online_csv += (
                 ",".join(
-                    [re.sub("[^A-Za-z0-9 ]+", "", _getitem(test, k)) for k in keys]
+                    [re.sub("[^A-Za-z0-9_ ]+", "", _getitem(test, k)) for k in keys]
                 )
                 + "\n"
             )
 
         self.results["online"] = online_csv
-        with open(path, "w") as fp:
+        with open(self.default_directory + "/jet.results.json", "w") as fp:
             json.dump(self.results, fp)
-
-        selected = subprocess.run(
-            [f"gum table <<< '{online_csv}' --widths '20,7,60'"],
-            text=True,
-            shell=True,
-        )
-        print(selected)
-
-        # print(online_csv)
-
-    # def evaluate(self, routine):
-    #     f = io.StringIO()
-    #     try:
-    #         with redirect_stdout(f):
-    #             routine()
-    #         return "Pass", []
-    #     except AssertionError as exc:
-    #         return "Failed", _catch(exc, f)
-    #     except RuntimeWarning as exc:
-    #         return "Warning", _catch(exc, f)
-    #     except Exception as exc:
-    #         return "Error", _catch(exc, f)
 
     def evaluate(self, routine, max_frames=1):
         with self.console.capture() as capture:
@@ -266,7 +245,9 @@ class Runner:
                     progress.console.print(self.verbose_two(result, routine["routine"]))
                 time.sleep(0.2)
                 progress.advance(task)
-            progress.console.print(self.verbose_one())
+            summary = self.verbose_one()
+            if summary != "Summary":
+                progress.console.print(summary)
 
         subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()
