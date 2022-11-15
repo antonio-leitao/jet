@@ -1,0 +1,8 @@
+routine,name,doc,module
+<function test_print_function at 0x103089630>,Print function,,Array operations
+<function test_arrays at 0x103089ea0>,Arrays,Checks differences between arrays,Example
+<function test_pass at 0x10308a050>,Pass,Should always pass under these configurations,Example
+<function test_something_else at 0x103089f30>,Something else,This is another that fails,Example
+<function test_standard_output at 0x10308a0e0>,Standard output,This function should always fail and has standard output,Example
+<function test_this_other_thing at 0x103089fc0>,This other thing,This one also fails,Example
+<function test_username at 0x103089e10>,Username,,Example

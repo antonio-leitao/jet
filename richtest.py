@@ -1,8 +1,6 @@
 import subprocess
 import textwrap
 
-indentation = "    "
-color = "38"  # 38 is best
 
 modules = [
     {"title": "ALL", "desc": "Run all found in the tests folder"},
@@ -32,7 +30,7 @@ modules = [
 ]
 
 
-def prep_description(desc, max_length=200, line_width=60):
+def prep_description(desc, indentation, max_length=200, line_width=60):
     # drop new lines
     desc = desc.replace("\n", " ")
     # truncate
@@ -45,62 +43,81 @@ def prep_description(desc, max_length=200, line_width=60):
     return desc
 
 
-def prep_module(mod):
+def prep_module(mod, indentation, max_length=200, line_width=60):
     title = subprocess.run(
         ["gum", "style", mod["title"]], stdout=subprocess.PIPE
     ).stdout
 
     desc = subprocess.run(
-        ["gum", "style", "--faint", prep_description(mod["desc"])],
+        [
+            "gum",
+            "style",
+            "--faint",
+            prep_description(
+                mod["desc"],
+                indentation=indentation,
+                max_length=max_length,
+                line_width=line_width,
+            ),
+        ],
         stdout=subprocess.PIPE,
     ).stdout.splitlines()[0]
     return title + desc
 
 
-# print("Which modules to run?\n")
-subprocess.run(
-    [
-        "gum",
-        "style",
-        "--background",
-        "31",
-        "--margin",
-        "0 4",
-        "Choose Modules to Run",
-    ]
-)
-subprocess.run(
-    [
-        "gum",
-        "style",
-        "--faint",
-        "--margin",
-        "1 4",
-        f"Found {len(modules)} modules",
-    ]
-)
-result = subprocess.run(
-    [
-        "gum",
-        "choose",
-        "--no-limit",
-        "--cursor.foreground",
-        color,  # 2274A5
-        "--selected.foreground",
-        color,
-        "--unselected-prefix",
-        "[ ] ",
-        "--cursor-prefix",
-        "[ ] ",
-        "--selected-prefix",
-        "[\u2713] ",
-    ]
-    + [prep_module(mod) for mod in modules],
-    # [list(self.modules.keys())],
-    stdout=subprocess.PIPE,
-    text=True,
-)
+def choose_modules(
+    modules, color="38", indentation="      ", max_length=200, line_width=60
+):
 
-subprocess.run(["printf '\33[4A[2K\r'"], shell=True)  ###erases n lines where n is [nA[
+    # print("Which modules to run?\n")
+    subprocess.run(
+        [
+            "gum",
+            "style",
+            "--background",
+            "161",
+            "--margin",
+            "0 4",
+            "--bold",
+            " Choose Modules ",
+        ]
+    )
+    subprocess.run(
+        [
+            "gum",
+            "style",
+            "--faint",
+            "--margin",
+            "1 4",
+            f"Found {len(modules)} modules",
+        ]
+    )
+    result = subprocess.run(
+        [
+            "gum",
+            "choose",
+            "--no-limit",
+            "--cursor.foreground",
+            color,  # 2274A5
+            "--selected.foreground",
+            color,
+            "--unselected-prefix",
+            "[ ] ",
+            "--cursor-prefix",
+            "[ ] ",
+            "--selected-prefix",
+            "[\u2713] ",
+        ]
+        + [
+            prep_module(mod, indentation, max_length=max_length, line_width=line_width)
+            for mod in modules
+        ],
+        # [list(self.modules.keys())],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
 
-# print(result.stdout.splitlines()[::2])
+    ###erases n lines where n is [nA[
+    subprocess.run(["printf '\33[4A[2K\r'"], shell=True)
+
+    return result.stdout.splitlines()[::2]

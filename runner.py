@@ -16,6 +16,7 @@ from contextlib import redirect_stdout
 import textwrap
 import time
 from rich.progress import Progress
+from richtest import choose_modules
 
 
 warnings.filterwarnings("error")
@@ -102,54 +103,15 @@ class Runner:
                     name, data = _get_data(os.path.join(dirpath, x))
                     self.modules[name] = data
 
-    def format_option(self, name, desc=None, max_length=200, line_width=60):
-        if desc is None:
-            return name
-        if len(desc) == 0:
-            return name
-        # drop new lines
-        desc = desc.replace("\n", " ")
-        # truncate
-        if len(desc) > max_length - 3:
-            desc = desc[:max_length] + "..."
-        # justify
-        desc = textwrap.fill(desc, line_width)
-        # add indentation
-        desc = textwrap.indent(desc, self.indentation)
-
-        return f"{name}\n\033[3m{desc}\033[0m"
-
-    def choose_modules(self):
+    def prompt_module_choice(self):
         self.get_modules()
-        options = [self.format_option(k, v["doc"]) for k, v in self.modules.items()]
-
-        print("Which modules to run?")
-        result = subprocess.run(
-            [
-                "gum",
-                "choose",
-                "--no-limit",
-                "--cursor.foreground",
-                self.main_color,  # 2274A5
-                "--selected.foreground",
-                self.main_color,
-                self.format_option("All"),
-            ]
-            + options,  # [list(self.modules.keys())],
-            stdout=subprocess.PIPE,
-            text=True,
-        )
-
-        choices = self.unformat_option(result.stdout.splitlines())
-        return choices
-
-    def unformat_option(self, choice_list):
-        choices = [s.split(self.indentation)[0] for s in choice_list]
-        return choices
+        options = [{"title": k, "desc": v["doc"]} for k, v in self.modules.items()]
+        options.insert(0, {"title": "Run All", "desc": "Run all test modules found."})
+        return choose_modules(options)
 
     def fetch_modules(self):
-        choices = self.choose_modules()
-        if "All" in choices:
+        choices = self.prompt_module_choice()
+        if "Run All" in choices:
             return
         self.modules = {k: v for k, v in self.modules.items() if k in choices}
         return
