@@ -1,2 +1,7 @@
-*.egg-info/
-dist/
+# Files
+.DS_Store
+
+# Binaries
+dist
+testdata
+*.egg-info
