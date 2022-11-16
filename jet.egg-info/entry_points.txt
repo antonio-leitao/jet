@@ -1,2 +1,2 @@
 [console_scripts]
-jet = jet.jet:jet
+jet = jet.main:main

@@ -14,8 +14,8 @@ import io
 from contextlib import redirect_stdout
 import time
 from rich.progress import Progress
-from jet_selection import choose_modules
 from rich.console import Console
+from jet.selection import choose_modules
 from functools import reduce
 from operator import getitem
 import re
@@ -90,7 +90,7 @@ def _catch(exc, f):
 
 
 class Runner:
-    def __init__(self, accent_color="38"):
+    def __init__(self, accent_color="38", default_directory = os.getcwd() + "/tests"):
         self.modules = {}
         self.verbose = 2
         self.colors = {
@@ -102,7 +102,7 @@ class Runner:
         self.indentation = "    "
         self.accent_color = accent_color
         self.console = Console()
-        self.default_directory = os.getcwd() + "/tests"
+        self.default_directory = default_directory
 
     def get_modules(self, path=None):
         if path is None:

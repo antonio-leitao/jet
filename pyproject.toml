@@ -1,3 +1,23 @@
-[build-system]
-build-backend = "setuptools.build_meta"
-requires = ["setuptools", "wheel"]
+[project]
+name = "jet"
+version = "0.0.1"
+authors = [
+  { name="António Leitão", email="aleitao@novaims.unl.pt" },
+]
+description = "Simple clean testing toolkit"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "rich>=12.6.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Antonio-Leitao/jet"
+
+[project.scripts]
+jet = "jet.main:main"

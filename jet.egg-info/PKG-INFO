@@ -2,9 +2,12 @@ Metadata-Version: 2.1
 Name: jet
 Version: 0.0.1
 Summary: Simple clean testing toolkit
-Home-page: https://github.com/Antonio-Leitao/jet
-Author: Antonio Leitao
-Author-email: aleitao@novaims.unl.pt
+Author-email: António Leitão <aleitao@novaims.unl.pt>
+Project-URL: Homepage, https://github.com/Antonio-Leitao/jet
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 
 ### Todo

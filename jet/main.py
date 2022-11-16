@@ -1,6 +1,29 @@
 import argparse
 from jet.runner import Runner
-from doctor import doctor, JetError
+from jet.doctor import doctor, JetError
+
+
+def dispatcher(a):
+    if a["action"] == "run":
+        if a["all"]:
+            print("running all tests (to be implemenetd")
+            return
+
+        if a["dir"] is not None:
+            Runner(accent_color="134", default_directory=a["dir"]).run_tests()  # 99!
+            return
+
+        Runner(accent_color="134").run_tests()
+        return
+
+    if a["action"] == "see":
+        if a["dir"] is not None:
+            doctor(default_directory=a["dir"])
+            return
+        doctor()
+        return
+
+    raise JetError("Unrecognized arguments")
 
 
 def main():
@@ -20,6 +43,15 @@ def main():
     )
 
     parser.add_argument(
+        "-a",
+        "--all",
+        help="""
+        Skip initial selection, run all found modules.
+        """,
+        action="store_true",
+    )
+
+    parser.add_argument(
         "-d",
         "--dir",
         help="""
@@ -31,16 +63,8 @@ def main():
 
     args = vars(parser.parse_args())
 
-    if args["action"] == "run":
-        Runner(accent_color="134").run_tests()  # 99!
-
-    elif args["action"] == "check":
-        doctor()
-
-    else:
-        raise JetError("Unrecognized argument, please use one of [run, check]")
+    dispatcher(args)
 
 
 if __name__ == "__main__":
-    # main(sys.argv[1])
     main()
