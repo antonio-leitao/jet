@@ -21,3 +21,6 @@ dependencies = [
 
 [project.scripts]
 jet = "jet.main:main"
+
+[tool.setuptools]
+packages = ["jet"]

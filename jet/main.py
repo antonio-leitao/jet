@@ -1,26 +1,20 @@
 import argparse
 from jet.runner import Runner
 from jet.doctor import doctor, JetError
+import importlib.metadata
+
+__version__ = importlib.metadata.version("jet")
 
 
 def dispatcher(a):
     if a["action"] == "run":
-        if a["all"]:
-            print("running all tests (to be implemenetd")
-            return
-
-        if a["dir"] is not None:
-            Runner(accent_color="134", default_directory=a["dir"]).run_tests()  # 99!
-            return
-
-        Runner(accent_color="134").run_tests()
+        Runner(
+            quiet=a["quiet"], run_all=a["all"], default_directory=a["dir"]
+        ).run_tests()  # 99!
         return
 
     if a["action"] == "see":
-        if a["dir"] is not None:
-            doctor(default_directory=a["dir"])
-            return
-        doctor()
+        doctor(default_directory=a["dir"])
         return
 
     raise JetError("Unrecognized arguments")
@@ -43,7 +37,6 @@ def main():
     )
 
     parser.add_argument(
-        "-a",
         "--all",
         help="""
         Skip initial selection, run all found modules.
@@ -52,13 +45,26 @@ def main():
     )
 
     parser.add_argument(
-        "-d",
         "--dir",
         help="""
         Path to tests directory. Defaults to working directory + /tests
         when not supplied.
         """,
         metavar="\b",
+    )
+
+    parser.add_argument(
+        "--quiet",
+        help="""
+        Disable outputing test results as they run.
+        """,
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s {version}".format(version=__version__),
     )
 
     args = vars(parser.parse_args())

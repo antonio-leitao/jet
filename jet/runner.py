@@ -90,9 +90,16 @@ def _catch(exc, f):
 
 
 class Runner:
-    def __init__(self, accent_color="38", default_directory = os.getcwd() + "/tests"):
+    def __init__(
+        self,
+        accent_color="134",  # 99 #38
+        quiet=False,
+        run_all=False,
+        default_directory=None,
+    ):
         self.modules = {}
-        self.verbose = 2
+        self.run_all = run_all
+        self.quiet = quiet
         self.colors = {
             "Pass": "green",  # 92m
             "Failed": "red",
@@ -103,6 +110,8 @@ class Runner:
         self.accent_color = accent_color
         self.console = Console()
         self.default_directory = default_directory
+        if self.default_directory is None:
+            self.default_directory = os.getcwd() + "/tests"
 
     def get_modules(self, path=None):
         if path is None:
@@ -114,12 +123,14 @@ class Runner:
                     self.modules[name] = data
 
     def prompt_module_choice(self):
-        self.get_modules()
         options = [{"title": k, "desc": v["doc"]} for k, v in self.modules.items()]
         options.insert(0, {"title": "Run All", "desc": "Run all test modules found."})
         return choose_modules(options, color=self.accent_color)
 
     def fetch_modules(self):
+        self.get_modules()
+        if self.run_all:
+            return
         choices = self.prompt_module_choice()
         if "Run All" in choices:
             return
@@ -240,7 +251,7 @@ class Runner:
                 if result != "Pass":
                     self.archive_routine_results(routine, result, details)
 
-                if self.verbose > 1:
+                if not self.quiet:
                     progress.console.print(self.verbose_two(result, routine["routine"]))
                 time.sleep(0.2)
                 progress.advance(task)

@@ -33,7 +33,10 @@ def prompt_diagnostic(online_csv):
     return selected.stdout.split(",")[0]
 
 
-def doctor(default_directory=os.getcwd() + "/tests"):
+def doctor(default_directory=None):
+    if default_directory is None:
+        default_directory = os.getcwd() + "/tests"
+
     try:
         with open(default_directory + "/jet.results.json", "r") as f:
             results = json.load(f)
