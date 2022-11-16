@@ -1,5 +1,2 @@
-#S=$(gum format < README.md)
-#gum pager "$S"
-
-S=$(gum input --placeholder "package name")
-echo "installiing $S"
+S=$(gum format < README.md)
+gum pager --margin="0 10" --border-foreground="131" --help.margin="0 10" "$S"

@@ -1,6 +1,6 @@
 import argparse
-from jet.runner import Runner
-from jet.doctor import doctor, JetError
+from runner import Runner
+from doctor import doctor, JetError
 import importlib.metadata
 
 __version__ = importlib.metadata.version("jet")

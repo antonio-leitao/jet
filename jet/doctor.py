@@ -49,7 +49,6 @@ def doctor(default_directory=None):
 
     # script only continues ifsomething was selected
     if name != "\n":
-        console = Console()
         for test in results["tests"]:
             if test["name"] == name:
                 print(test["diagnosis"]["big_log"])
