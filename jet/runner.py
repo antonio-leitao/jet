@@ -18,11 +18,7 @@ from operator import getitem
 import re
 
 from rich.progress import Progress
-from rich.console import Console
 from jet.selection import choose_modules
-
-
-
 
 
 warnings.filterwarnings("error")
@@ -81,15 +77,27 @@ def _get_data(path):
     return name, data
 
 
-def _catch(exc, f):
-    """type, descriptiom, place, output"""
-    out = f.getvalue()
-    x = traceback.format_exc()
+# def _catch(exc, f):
+#     """type, descriptiom, place, output"""
+#     out = f.getvalue()
+#     x = traceback.format_exc()
+#     details = {
+#         "type": type(exc).__name__,
+#         "description": str(exc),
+#         "place": [i.replace("  ", "") for i in x.split("\n") if i][-2],
+#         "output": out,
+#     }
+#     return details
+
+
+def _catch(f, exc, info, variables):
     details = {
-        "type": type(exc).__name__,
+        "mod_path": info.filename,
+        "line": info.lineno,
+        "locals": variables,
         "description": str(exc),
-        "place": [i.replace("  ", "") for i in x.split("\n") if i][-2],
-        "output": out,
+        "type": type(exc).__name__,
+        "out": f.getvalue(),
     }
     return details
 
@@ -113,7 +121,6 @@ class Runner:
         }
         self.indentation = "    "
         self.accent_color = accent_color
-        self.console = Console()
         self.default_directory = default_directory
         if self.default_directory is None:
             self.default_directory = os.getcwd() + "/tests"
@@ -192,44 +199,68 @@ class Runner:
         with open(self.default_directory + "/jet.results.json", "w") as fp:
             json.dump(self.results, fp)
 
-    def evaluate(self, routine, max_frames=1):
-        with self.console.capture() as capture:
-            f = io.StringIO()
-            try:
-                with redirect_stdout(f):
-                    routine()
-                result = "Pass"
-                details = []
-            except AssertionError as exc:
-                self.console.print_exception(
-                    max_frames=max_frames,
-                    show_locals=True,
-                    suppress=[__file__],
-                )
-                result = "Failed"
-                details = _catch(exc, f)
-            except RuntimeWarning as exc:
-                self.console.print_exception(
-                    max_frames=max_frames,
-                    show_locals=True,
-                    suppress=[__file__],
-                )
-                result = "Warning"
-                details = _catch(exc, f)
-            except Exception as exc:
-                self.console.print_exception(
-                    max_frames=max_frames,
-                    show_locals=True,
-                    suppress=[__file__],
-                )
-                result = "Error"
-                details = _catch(exc, f)
+    def evaluate(self, routine):
+        f = io.StringIO()
+        try:
+            with redirect_stdout(f):
+                routine()
+            return "Pass", None
+        except AssertionError as exc:
+            info = traceback.extract_tb(sys.exc_info()[2])[-1]
+            variables = inspect.trace()[-1][0].f_locals
+            details = _catch(f, exc, info, variables)
+            return "Failed", details
 
-        if result == "Pass":
-            return result, details
+        except RuntimeWarning as exc:
+            info = traceback.extract_tb(sys.exc_info()[2])[-1]
+            variables = inspect.trace()[-1][0].f_locals
+            details = _catch(f, exc, info, variables)
+            return "Warning", details
 
-        details["big_log"] = capture.get()
-        return result, details
+        except Exception as exc:
+            info = traceback.extract_tb(sys.exc_info()[2])[-1]
+            variables = inspect.trace()[-1][0].f_locals
+            details = _catch(f, exc, info, variables)
+            return "Error", details
+
+    # def evaluate(self, routine, max_frames=1):
+    #     with self.console.capture() as capture:
+    #         f = io.StringIO()
+    #         try:
+    #             with redirect_stdout(f):
+    #                 routine()
+    #             result = "Pass"
+    #             details = []
+    #         except AssertionError as exc:
+    #             self.console.print_exception(
+    #                 max_frames=max_frames,
+    #                 show_locals=True,
+    #                 suppress=[__file__],
+    #             )
+    #             result = "Failed"
+    #             details = _catch(exc, f)
+    #         except RuntimeWarning as exc:
+    #             self.console.print_exception(
+    #                 max_frames=max_frames,
+    #                 show_locals=True,
+    #                 suppress=[__file__],
+    #             )
+    #             result = "Warning"
+    #             details = _catch(exc, f)
+    #         except Exception as exc:
+    #             self.console.print_exception(
+    #                 max_frames=max_frames,
+    #                 show_locals=True,
+    #                 suppress=[__file__],
+    #             )
+    #             result = "Error"
+    #             details = _catch(exc, f)
+
+    #     if result == "Pass":
+    #         return result, details
+
+    #     details["big_log"] = capture.get()
+    #     return result, details
 
     def run_tests(self):
         tests = self.fetch_tests()
@@ -252,7 +283,7 @@ class Runner:
                 result, details = self.evaluate(routine["routine"])
                 self.results["summary"][result] += 1
 
-                # srchive only errors, warning and fails
+                # archive only errors, warning and fails
                 if result != "Pass":
                     self.archive_routine_results(routine, result, details)
 
@@ -261,8 +292,10 @@ class Runner:
                 time.sleep(0.2)
                 progress.advance(task)
             summary = self.verbose_one()
+            self.results["summary"]["string"] = ""
             if summary != "Summary":
                 progress.console.print(summary)
+                self.results["summary"]["string"] = summary
 
         subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()
@@ -281,15 +314,12 @@ class Runner:
         doc = routine.__doc__
         if doc is None:
             doc = _clean_name(routine.__name__)
-
         if result == "Pass":
             tick = "\u2713"
             return f"[{self.colors['Pass']}]{tick}[/{self.colors['Pass']}] {doc}"
-
         if result == "Failed":
             cross = "\u2717"
             return f"[{self.colors['Failed']}]{cross}[/{self.colors['Failed']}] {doc}"
-
         else:
             mark = "?"
             return f"[{self.colors['Warning']}]{mark}[/{self.colors['Warning']}] {doc}"

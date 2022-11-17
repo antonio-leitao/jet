@@ -6,7 +6,7 @@ Gives detailed results on demand.
 import os
 import json
 import subprocess
-from rich.console import Console
+from jet.seer import Seer
 
 
 class JetError(Exception):
@@ -51,4 +51,11 @@ def doctor(default_directory=None):
     if name != "\n":
         for test in results["tests"]:
             if test["name"] == name:
-                print(test["diagnosis"]["big_log"])
+                Seer(
+                    max_width=160,
+                    result=test["result"],
+                    diagnosis=test["diagnosis"],
+                    fun_name=test["name"],
+                    fun_doc=test["doc"],
+                    mod_name=test["module"],
+                ).display()
