@@ -52,7 +52,7 @@ def doctor(default_directory=None):
         for test in results["tests"]:
             if test["name"] == name:
                 Seer(
-                    max_width=160,
+                    max_width=120,
                     result=test["result"],
                     diagnosis=test["diagnosis"],
                     fun_name=test["name"],

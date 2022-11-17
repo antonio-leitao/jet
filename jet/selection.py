@@ -1,7 +1,10 @@
 import subprocess
 import textwrap
 
+
 def prep_description(desc, indentation, max_length=200, line_width=60):
+    if desc is None:
+        desc = "..."
     # drop new lines
     desc = desc.replace("\n", " ")
     # truncate
@@ -59,7 +62,7 @@ def choose_modules(
             "--faint",
             "--margin",
             "1 4",
-            f"Found {len(modules)} modules",
+            f"Found {len(modules)-1} modules",  # exclude "all"
         ]
     )
     result = subprocess.run(

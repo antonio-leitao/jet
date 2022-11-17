@@ -16,9 +16,11 @@ import time
 from functools import reduce
 from operator import getitem
 import re
+import jet.checks as jetcheck
 
 from rich.progress import Progress
 from jet.selection import choose_modules
+from jet.doctor import JetError
 
 
 warnings.filterwarnings("error")
@@ -77,24 +79,35 @@ def _get_data(path):
     return name, data
 
 
-# def _catch(exc, f):
-#     """type, descriptiom, place, output"""
-#     out = f.getvalue()
-#     x = traceback.format_exc()
-#     details = {
-#         "type": type(exc).__name__,
-#         "description": str(exc),
-#         "place": [i.replace("  ", "") for i in x.split("\n") if i][-2],
-#         "output": out,
-#     }
-#     return details
+def _is_jsonable(x):
+    try:
+        json.dumps(x)
+        return True
+    except:
+        return False
+
+
+def _clean_variables(variables):
+    if variables is None:
+        return variables
+    if len(variables) == 0:
+        return variables
+
+    new_variables = {}
+    for k, v in variables.items():
+        if hasattr(v, "__name__"):
+            v = v.__name__
+        elif not _is_jsonable(v):
+            v = str(v)
+        new_variables[k] = v
+    return new_variables
 
 
 def _catch(f, exc, info, variables):
     details = {
         "mod_path": info.filename,
         "line": info.lineno,
-        "locals": variables,
+        "locals": _clean_variables(variables),
         "description": str(exc),
         "type": type(exc).__name__,
         "out": f.getvalue(),
@@ -115,9 +128,9 @@ class Runner:
         self.quiet = quiet
         self.colors = {
             "Pass": "green",  # 92m
-            "Failed": "red",
+            "Failed": "red3",
+            "Error": "orange3",
             "Warning": "yellow",
-            "Error": "gray23",
         }
         self.indentation = "    "
         self.accent_color = accent_color
@@ -199,7 +212,15 @@ class Runner:
         with open(self.default_directory + "/jet.results.json", "w") as fp:
             json.dump(self.results, fp)
 
+    def do_jet_checks(self, routine):
+        # add custom tests and checks here.
+        result, details = jetcheck.arguments(routine)
+        return result, details
+
     def evaluate(self, routine):
+        result, details = self.do_jet_checks(routine)
+        if result is not None:
+            return result, details
         f = io.StringIO()
         try:
             with redirect_stdout(f):

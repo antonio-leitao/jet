@@ -27,7 +27,10 @@ class Seer:
             "Warning": "yellow",
         }
         self.gum_colors = {"Failed": "160", "Error": "172", "Warning": "11"}
-        self.GUMPAD = max([0, os.get_terminal_size().columns - max_width])
+
+        # term = os.get_terminal_size().columns
+
+        self.GUMPAD = int(max([0, os.get_terminal_size().columns - max_width]) / 2)
         self.MAX_WIDTH = os.get_terminal_size().columns - (12 + 2 * self.GUMPAD)
         self.TEXT_WIDTH = 60
 
@@ -101,6 +104,9 @@ class Seer:
 
     def locals_panel(self):
         variables = self.diagnosis["locals"]
+        if (variables is None) or len(variables) == 0:
+            self.console.height = self.buffer + 5
+            return self._center(Text(""))
         count = 0
         text = Text()
         for k, v in variables.items():
