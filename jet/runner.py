@@ -19,8 +19,7 @@ import re
 import jet.checks as jetcheck
 
 from rich.progress import Progress
-from jet.selection import choose_modules
-from jet.doctor import JetError
+from jet.mod_selection import choose_modules
 
 
 warnings.filterwarnings("error")
@@ -243,45 +242,6 @@ class Runner:
             variables = inspect.trace()[-1][0].f_locals
             details = _catch(f, exc, info, variables)
             return "Error", details
-
-    # def evaluate(self, routine, max_frames=1):
-    #     with self.console.capture() as capture:
-    #         f = io.StringIO()
-    #         try:
-    #             with redirect_stdout(f):
-    #                 routine()
-    #             result = "Pass"
-    #             details = []
-    #         except AssertionError as exc:
-    #             self.console.print_exception(
-    #                 max_frames=max_frames,
-    #                 show_locals=True,
-    #                 suppress=[__file__],
-    #             )
-    #             result = "Failed"
-    #             details = _catch(exc, f)
-    #         except RuntimeWarning as exc:
-    #             self.console.print_exception(
-    #                 max_frames=max_frames,
-    #                 show_locals=True,
-    #                 suppress=[__file__],
-    #             )
-    #             result = "Warning"
-    #             details = _catch(exc, f)
-    #         except Exception as exc:
-    #             self.console.print_exception(
-    #                 max_frames=max_frames,
-    #                 show_locals=True,
-    #                 suppress=[__file__],
-    #             )
-    #             result = "Error"
-    #             details = _catch(exc, f)
-
-    #     if result == "Pass":
-    #         return result, details
-
-    #     details["big_log"] = capture.get()
-    #     return result, details
 
     def run_tests(self):
         tests = self.fetch_tests()

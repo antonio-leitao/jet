@@ -74,6 +74,12 @@ def choose_modules(
             color,  # 2274A5
             "--selected.foreground",
             color,
+            "--item.margin",
+            "0 3",
+            "--cursor.margin",
+            "0 0",
+            "--selected.margin",
+            "0 3",
             "--unselected-prefix",
             "[ ] ",
             "--cursor-prefix",

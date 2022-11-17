@@ -126,7 +126,7 @@ class Seer:
         with open(filepath, "r") as text_file:
             for line in itertools.islice(text_file, start_line, lineno + 1):
                 if current_line == lineno:
-                    text.append(line, style=f"white on {color}")
+                    text.append(line, style=f"bold white on {color}")
                 else:
                     text.append(line, style="dim")
                     # text.append(self.highlight(line))

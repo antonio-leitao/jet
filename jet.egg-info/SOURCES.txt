@@ -4,9 +4,10 @@ jet/__init__.py
 jet/checks.py
 jet/doctor.py
 jet/main.py
+jet/mod_selection.py
 jet/runner.py
 jet/seer.py
-jet/selection.py
+jet/test_selection.py
 jet.egg-info/PKG-INFO
 jet.egg-info/SOURCES.txt
 jet.egg-info/dependency_links.txt
