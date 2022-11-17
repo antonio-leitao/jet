@@ -191,23 +191,7 @@ class Runner:
         self.results["tests"].append(test_result)
 
     def dump_results(self):
-        cols = ["Name", "Result", "Diagnosis"]
-        keys = [
-            ["name"],
-            ["result"],
-            ["diagnosis", "description"],  # ["diagnosis", "ouput"]
-        ]
 
-        online_csv = ",".join(cols) + "\n"
-        for test in self.results["tests"]:
-            online_csv += (
-                ",".join(
-                    [re.sub("[^A-Za-z0-9_ ]+", "", _getitem(test, k)) for k in keys]
-                )
-                + "\n"
-            )
-
-        self.results["online"] = online_csv
         with open(self.default_directory + "/jet.results.json", "w") as fp:
             json.dump(self.results, fp)
 
@@ -273,10 +257,8 @@ class Runner:
                 time.sleep(0.2)
                 progress.advance(task)
             summary = self.verbose_one()
-            self.results["summary"]["string"] = ""
             if summary != "Summary":
                 progress.console.print(summary)
-                self.results["summary"]["string"] = summary
 
         subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()

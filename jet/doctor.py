@@ -44,7 +44,7 @@ def doctor(default_directory=None):
     except FileNotFoundError:
         raise JetError("No results to diagnose found. Run jet run to run tests")
 
-    name = choose_tests(results["tests"], summary=results["summary"]["string"])
+    name = choose_tests(results["tests"], summary=results["summary"])
     # subprocess.run(["printf '\33[2A'"], shell=True)  # moves cursor 5 lines up
     # subprocess.run(["printf '\33[J\r'"], shell=True)
 

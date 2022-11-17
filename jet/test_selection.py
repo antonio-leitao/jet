@@ -1,6 +1,5 @@
 import subprocess
 import textwrap
-from rich.console import Console
 
 ##THIS ONE IS COMMON
 def prep_description(desc, indentation, max_length=200, line_width=60):
@@ -43,10 +42,19 @@ def prep_module(test, indentation, max_length=200, line_width=60):
     return title + desc
 
 
+def prep_summary(summary):
+    s = ""
+    for result in ["Failed", "Warning", "Error"]:
+        n = summary[result]
+        if n == 0:
+            continue
+        s += f"{str(n)} {result.lower()}, "
+    return s + f"out of {summary['n_tests']} tests."
+
+
 def choose_tests(
     tests, summary, color="134", indentation="  ", max_length=200, line_width=60
 ):
-    console = Console()
     subprocess.run(["echo"])
     subprocess.run(
         [
@@ -67,7 +75,7 @@ def choose_tests(
             "--faint",
             "--margin",
             "1 4",
-            summary,  # exclude "all"
+            prep_summary(summary),  # exclude "all"
         ]
     )
     result = subprocess.run(
@@ -97,4 +105,6 @@ def choose_tests(
     # subprocess.run(["printf '\33[4A[2K\r'"], shell=True)  # 4A2K
     subprocess.run(["printf '\33[5A'"], shell=True)  # moves cursor 5 lines up
     subprocess.run(["printf '\33[J\r'"], shell=True)  # deletes everything to bottom
+    if len(result.stdout.splitlines()) < 1:
+        return
     return result.stdout.splitlines()[0]
