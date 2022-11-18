@@ -15,7 +15,6 @@ from contextlib import redirect_stdout
 import time
 from functools import reduce
 from operator import getitem
-import re
 import jet.checks as jetcheck
 
 from rich.progress import Progress
@@ -258,9 +257,9 @@ class Runner:
                 progress.advance(task)
             summary = self.verbose_one()
             if summary != "Summary":
-                progress.console.print(summary)
+                progress.console.print("\r" + summary)
 
-        subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
+        # subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()
 
     def verbose_one(self):
