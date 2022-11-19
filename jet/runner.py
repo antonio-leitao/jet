@@ -6,22 +6,62 @@ import os
 import inspect
 import importlib.util
 import sys
-import subprocess
 import traceback
 import warnings
 import json
 import io
 from contextlib import redirect_stdout
 import time
-from functools import reduce
-from operator import getitem
 import jet.checks as jetcheck
 
-from rich.progress import Progress
+from rich.text import Text
+from rich.console import Console
+from rich.theme import Theme
+from rich.progress import (
+    Progress,
+    ProgressColumn,
+    TaskProgressColumn,
+    TextColumn,
+    BarColumn,
+)
 from jet.mod_selection import choose_modules
 
 
 warnings.filterwarnings("error")
+
+
+class CompletedColumn(ProgressColumn):
+    """Renders completed count/total, e.g. '  10/1000'.
+
+    Best for bounded tasks with int quantities.
+
+    Space pads the completed count so that progress length does not change as task progresses
+    past powers of 10.
+
+    Args:
+        separator (str, optional): Text to separate completed and total values. Defaults to "/".
+    """
+
+    def __init__(self, separator="/", table_column=None):
+        self.separator = separator
+        super().__init__(table_column=table_column)
+
+    def render(self, task):
+        """Show completed/total."""
+        completed = int(task.completed)
+        total = int(task.total) if task.total is not None else "?"
+        total_width = len(str(total))
+
+        if int(f"{completed:{total_width}d}") == total:
+            return Text(
+                f"{completed:{total_width}d}{self.separator}{total}",
+                style="bar.finished",
+            )
+
+        return Text(
+            f"{completed:{total_width}d}{self.separator}{total}",
+            style="progress.percentage",
+        )
 
 
 class ErrorDuringImport(Exception):
@@ -34,13 +74,6 @@ class ErrorDuringImport(Exception):
     def __str__(self):
         exc = self.exc.__name__
         return "problem in %s - %s: %s" % (self.filename, exc, self.value)
-
-
-def _getitem(d, key):
-    try:
-        return reduce(getitem, key, d)
-    except KeyError:
-        return ""
 
 
 def _importfile(path):
@@ -117,9 +150,11 @@ class Runner:
     def __init__(
         self,
         accent_color="134",  # 99 #38
+        second_color="rgb(249,38,114)",
         quiet=False,
         run_all=False,
         default_directory=None,
+        show_percentage=False,
     ):
         self.modules = {}
         self.run_all = run_all
@@ -132,7 +167,9 @@ class Runner:
         }
         self.indentation = "    "
         self.accent_color = accent_color
+        self.show_percentage = show_percentage
         self.default_directory = default_directory
+        self.second_color = second_color
         if self.default_directory is None:
             self.default_directory = os.getcwd() + "/tests"
 
@@ -227,6 +264,10 @@ class Runner:
             return "Error", details
 
     def run_tests(self):
+        console = Console(theme=Theme({"progress.percentage": self.second_color}))
+        progress_column = (
+            TaskProgressColumn() if self.show_percentage else CompletedColumn()
+        )
         tests = self.fetch_tests()
         n_tests = len(tests)
         self.results = {
@@ -240,7 +281,12 @@ class Runner:
             "tests": [],
         }
 
-        with Progress() as progress:
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            progress_column,
+            console=console,
+        ) as progress:
             task = progress.add_task("Running tests", total=n_tests)
             for routine in tests:
                 # verbose with some extent
@@ -257,8 +303,10 @@ class Runner:
                 progress.advance(task)
             summary = self.verbose_one()
             if summary != "Summary":
-                progress.console.print("\r" + summary)
+                progress.console.print(summary)
 
+        sys.stdout.write("\33[A")
+        sys.stdout.write("\33[J\r")
         # subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
         self.dump_results()
 
