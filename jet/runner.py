@@ -149,6 +149,7 @@ def _catch(f, exc, info, variables):
 class Runner:
     def __init__(
         self,
+        supplied=[],
         accent_color="134",  # 99 #38
         second_color="rgb(249,38,114)",
         quiet=False,
@@ -157,6 +158,7 @@ class Runner:
         show_percentage=False,
     ):
         self.modules = {}
+        self.supplied = supplied
         self.run_all = run_all
         self.quiet = quiet
         self.colors = {
@@ -174,13 +176,21 @@ class Runner:
             self.default_directory = os.getcwd() + "/tests"
 
     def get_modules(self, path=None):
-        if path is None:
-            path = self.default_directory
-        for dirpath, subdirs, files in os.walk(path):
-            for x in files:
-                if x.endswith(".py") and x.startswith("test_"):
-                    name, data = _get_data(os.path.join(dirpath, x))
-                    self.modules[name] = data
+        if not self.supplied:
+            if path is None:
+                path = self.default_directory
+            for dirpath, subdirs, files in os.walk(path):
+                for x in files:
+                    if x.endswith(".py") and x.startswith("test_"):
+                        name, data = _get_data(os.path.join(dirpath, x))
+                        self.modules[name] = data
+            return
+
+        # if supplied
+        for x in self.supplied:
+            if x.endswith(".py"):
+                name, data = _get_data(self.default_directory + "/" + x)
+                self.modules[name] = data
 
     def prompt_module_choice(self):
         options = [{"title": k, "desc": v["doc"]} for k, v in self.modules.items()]
@@ -227,7 +237,6 @@ class Runner:
         self.results["tests"].append(test_result)
 
     def dump_results(self):
-
         with open(self.default_directory + "/jet.results.json", "w") as fp:
             json.dump(self.results, fp)
 

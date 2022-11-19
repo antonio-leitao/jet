@@ -9,7 +9,10 @@ __version__ = importlib.metadata.version("jet")
 def dispatcher(a):
     if a["action"] == "run":
         Runner(
-            quiet=a["quiet"], run_all=a["all"], default_directory=a["dir"]
+            quiet=a["quiet"],
+            run_all=a["all"],
+            default_directory=a["dir"],
+            supplied=a["files"],
         ).run_tests()  # 99!
         return
 
@@ -37,6 +40,7 @@ def main():
     )
 
     parser.add_argument(
+        "-a",
         "--all",
         help="""
         Skip initial selection, run all found modules.
@@ -45,6 +49,17 @@ def main():
     )
 
     parser.add_argument(
+        "-a",
+        "--files",
+        nargs="+",
+        help="""
+        Consider only the specified list of python modules. Path is considered to be relative.
+        """,
+        metavar="\b",
+    )
+
+    parser.add_argument(
+        "-d",
         "--dir",
         help="""
         Path to tests directory. Defaults to working directory + /tests
@@ -54,6 +69,7 @@ def main():
     )
 
     parser.add_argument(
+        "-q",
         "--quiet",
         help="""
         Disable outputing test results as they run.
