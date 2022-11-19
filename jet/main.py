@@ -49,7 +49,7 @@ def main():
     )
 
     parser.add_argument(
-        "-a",
+        "-f",
         "--files",
         nargs="+",
         help="""
