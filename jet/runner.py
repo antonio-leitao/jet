@@ -2,6 +2,7 @@
 Finds all scripts .py that start with test_ in the folder tests.
 return all function name too?
 """
+# standard imports
 import os
 import inspect
 import importlib.util
@@ -11,9 +12,13 @@ import warnings
 import json
 import io
 from contextlib import redirect_stdout
-import time
-import jet.checks as jetcheck
+import multiprocessing
 
+# self imports
+import jet.checks as jetcheck
+from jet.mod_selection import choose_modules
+
+# dependencies
 from rich.text import Text
 from rich.console import Console
 from rich.theme import Theme
@@ -24,7 +29,6 @@ from rich.progress import (
     TextColumn,
     BarColumn,
 )
-from jet.mod_selection import choose_modules
 
 
 warnings.filterwarnings("error")
@@ -156,6 +160,7 @@ class Runner:
         run_all=False,
         default_directory=None,
         show_percentage=False,
+        n_jobs=None,
     ):
         self.modules = {}
         self.supplied = supplied
@@ -170,8 +175,13 @@ class Runner:
         self.indentation = "    "
         self.accent_color = accent_color
         self.show_percentage = show_percentage
-        self.default_directory = default_directory
+
         self.second_color = second_color
+        self.n_jobs = n_jobs
+        if self.n_jobs is None:
+            self.n_jobs = multiprocessing.cpu_count() * 4
+
+        self.default_directory = default_directory
         if self.default_directory is None:
             self.default_directory = os.getcwd() + "/tests"
 
@@ -272,6 +282,50 @@ class Runner:
             details = _catch(f, exc, info, variables)
             return "Error", details
 
+    def parallel_run(self):
+        console = Console(theme=Theme({"progress.percentage": self.second_color}))
+        progress_column = (
+            TaskProgressColumn() if self.show_percentage else CompletedColumn()
+        )
+        tests = self.fetch_tests()
+        n_tests = len(tests)
+        self.results = {
+            "summary": {
+                "n_tests": n_tests,
+                "Pass": 0,
+                "Failed": 0,
+                "Warning": 0,
+                "Error": 0,
+            },
+            "tests": [],
+        }
+
+        def _inner(routine):
+            result, details = self.evaluate(routine["routine"])
+            self.results["summary"][result] += 1
+            if result != "Pass":
+                self.archive_routine_results(routine, result, details)
+            return self.verbose_two(result, routine["routine"])
+
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            progress_column,
+            console=console,
+        ) as progress:
+            task = progress.add_task("Running tests", total=n_tests)
+            with multiprocessing.Pool(processes=self.n_jobs) as pool:
+                for verb in pool.imap(_inner, tests):
+                    if not self.quiet:
+                        progress.console.print(verb)
+                    progress.advance(task)
+            summary = self.verbose_one()
+            if summary != "Summary":
+                progress.console.print(summary)
+        sys.stdout.write("\33[A")
+        sys.stdout.write("\33[J\r")
+        self.dump_results()
+
     def run_tests(self):
         console = Console(theme=Theme({"progress.percentage": self.second_color}))
         progress_column = (
@@ -296,7 +350,9 @@ class Runner:
             progress_column,
             console=console,
         ) as progress:
+
             task = progress.add_task("Running tests", total=n_tests)
+
             for routine in tests:
                 # verbose with some extent
                 result, details = self.evaluate(routine["routine"])
@@ -308,7 +364,6 @@ class Runner:
 
                 if not self.quiet:
                     progress.console.print(self.verbose_two(result, routine["routine"]))
-                time.sleep(0.2)
                 progress.advance(task)
             summary = self.verbose_one()
             if summary != "Summary":

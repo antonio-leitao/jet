@@ -6,8 +6,30 @@ import importlib.metadata
 __version__ = importlib.metadata.version("jet")
 
 
+def job_int(string):
+    value = int(string)
+    if value < 1:
+        msg = "jobs cannot be less than one, received: %r" % string
+        raise argparse.ArgumentTypeError(msg)
+    if value > 64:
+        msg = "jobs have to be less than 64, received: %r" % string
+        raise argparse.ArgumentTypeError(msg)
+    return value
+
+
 def dispatcher(a):
+
     if a["action"] == "run":
+        if a["jobs"] is not None:
+            Runner(
+                quiet=a["quiet"],
+                run_all=a["all"],
+                default_directory=a["dir"],
+                supplied=a["files"],
+                n_jobs=a["jobs"],
+            ).parallel_run()  # 99!
+            return
+
         Runner(
             quiet=a["quiet"],
             run_all=a["all"],
@@ -65,6 +87,16 @@ def main():
         Path to tests directory. Defaults to working directory + /tests
         when not supplied.
         """,
+        metavar="\b",
+    )
+
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        help="""
+        Number of processes to use in parallel when running tests. Defaults to one.
+        """,
+        type=job_int,
         metavar="\b",
     )
 
