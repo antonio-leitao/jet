@@ -133,24 +133,44 @@ class Seer:
                 current_line += 1
         return self._center(text)
 
-    def function_code_and_locals(self):
-        layout = Layout()
-        layout.split_row(
-            Layout(
-                Panel(
-                    self.function_panel(),
-                    title=f"{self.fun_name} @ {self.mod_name}",
+    def function_code_and_locals(self, threshold=95):
+        if self.MAX_WIDTH >= threshold:
+            layout = Layout()
+            layout.split_row(
+                Layout(
+                    Panel(
+                        self.function_panel(),
+                        title=f"{self.fun_name} @ {self.mod_name}",
+                    ),
+                    name="code",
                 ),
-                name="code",
-            ),
-            Layout(
-                Panel(self.locals_panel(), title="Local variables"),
-                name="locals",
-            ),
-        )
-        layout["code"].ratio = 1597
-        layout["locals"].ratio = 987
-        self.blocks.append(layout)
+                Layout(
+                    Panel(self.locals_panel(), title="Local variables"),
+                    name="locals",
+                ),
+            )
+            layout["code"].ratio = 1597
+            layout["locals"].ratio = 987
+            self.blocks.append(layout)
+        else:
+            self.blocks.append(
+                self._center(
+                    Panel(
+                        self.function_panel(),
+                        title=f"{self.fun_name} @ {self.mod_name}",
+                        width=self.TEXT_WIDTH + 4,
+                    )
+                )
+            )
+            self.blocks.append(
+                self._center(
+                    Panel(
+                        self.locals_panel(),
+                        title="Local variables",
+                        width=self.TEXT_WIDTH + 4,
+                    )
+                )
+            )
 
     def make_report(self):
         self.report_result()
