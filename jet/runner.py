@@ -107,7 +107,7 @@ def _clean_name(path):
 
 
 # path comes in -> module path, name, description and module
-def _get_data(path):
+def _get_module_data(path):
     module = _importfile(path)
     name = _clean_name(path)
     data = {"doc": module.__doc__, "path": path, "module": module}
@@ -192,14 +192,14 @@ class Runner:
             for dirpath, subdirs, files in os.walk(path):
                 for x in files:
                     if x.endswith(".py") and x.startswith("test_"):
-                        name, data = _get_data(os.path.join(dirpath, x))
+                        name, data = _get_module_data(os.path.join(dirpath, x))
                         self.modules[name] = data
             return
 
         # if supplied
         for x in self.supplied:
             if x.endswith(".py"):
-                name, data = _get_data(self.default_directory + "/" + x)
+                name, data = _get_module_data(self.default_directory + "/" + x)
                 self.modules[name] = data
 
     def prompt_module_choice(self):
@@ -302,10 +302,7 @@ class Runner:
 
         def _inner(routine):
             result, details = self.evaluate(routine["routine"])
-            self.results["summary"][result] += 1
-            if result != "Pass":
-                self.archive_routine_results(routine, result, details)
-            return self.verbose_two(result, routine["routine"])
+            return result, details
 
         with Progress(
             TextColumn("[progress.description]{task.description}"),
@@ -315,10 +312,16 @@ class Runner:
         ) as progress:
             task = progress.add_task("Running tests", total=n_tests)
             with multiprocessing.Pool(processes=self.n_jobs) as pool:
-                for verb in pool.imap(_inner, tests):
+                for result, details in pool.imap(_inner, tests):
+                    self.results["summary"][result] += 1
+                    if result != "Pass":
+                        self.archive_routine_results(routine, result, details)
                     if not self.quiet:
-                        progress.console.print(verb)
+                        progress.console.print(
+                            self.verbose_two(result, routine["routine"])
+                        )
                     progress.advance(task)
+
             summary = self.verbose_one()
             if summary != "Summary":
                 progress.console.print(summary)
