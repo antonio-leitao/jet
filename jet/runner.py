@@ -282,53 +282,6 @@ class Runner:
             details = _catch(f, exc, info, variables)
             return "Error", details
 
-    def parallel_run(self):
-        console = Console(theme=Theme({"progress.percentage": self.second_color}))
-        progress_column = (
-            TaskProgressColumn() if self.show_percentage else CompletedColumn()
-        )
-        tests = self.fetch_tests()
-        n_tests = len(tests)
-        self.results = {
-            "summary": {
-                "n_tests": n_tests,
-                "Pass": 0,
-                "Failed": 0,
-                "Warning": 0,
-                "Error": 0,
-            },
-            "tests": [],
-        }
-
-        def _inner(routine):
-            result, details = self.evaluate(routine["routine"])
-            return result, details
-
-        with Progress(
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            progress_column,
-            console=console,
-        ) as progress:
-            task = progress.add_task("Running tests", total=n_tests)
-            with multiprocessing.Pool(processes=self.n_jobs) as pool:
-                for result, details in pool.imap(_inner, tests):
-                    self.results["summary"][result] += 1
-                    if result != "Pass":
-                        self.archive_routine_results(routine, result, details)
-                    if not self.quiet:
-                        progress.console.print(
-                            self.verbose_two(result, routine["routine"])
-                        )
-                    progress.advance(task)
-
-            summary = self.verbose_one()
-            if summary != "Summary":
-                progress.console.print(summary)
-        sys.stdout.write("\33[A")
-        sys.stdout.write("\33[J\r")
-        self.dump_results()
-
     def run_tests(self):
         console = Console(theme=Theme({"progress.percentage": self.second_color}))
         progress_column = (

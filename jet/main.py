@@ -1,56 +1,24 @@
+""":: JET ::
+Simple, clean minimalistic testing library.
+Testing library for python with emphasis on simplicity and presentation.
+"""
+
 import argparse
-from jet.runner import Runner
-from jet.doctor import doctor, JetError
+
+from new_runner import Run
+from classes import JetConfig
 import importlib.metadata
+import textwrap
+import os
 
-__version__ = importlib.metadata.version("jet")
-
-
-def job_int(string):
-    value = int(string)
-    if value < 1:
-        msg = "jobs cannot be less than one, received: %r" % string
-        raise argparse.ArgumentTypeError(msg)
-    if value > 64:
-        msg = "jobs have to be less than 64, received: %r" % string
-        raise argparse.ArgumentTypeError(msg)
-    return value
-
-
-def dispatcher(a):
-
-    if a["action"] == "run":
-        if a["jobs"] is not None:
-            Runner(
-                quiet=a["quiet"],
-                run_all=a["all"],
-                default_directory=a["dir"],
-                supplied=a["files"],
-                n_jobs=a["jobs"],
-            ).parallel_run()  # 99!
-            return
-
-        Runner(
-            quiet=a["quiet"],
-            run_all=a["all"],
-            default_directory=a["dir"],
-            supplied=a["files"],
-        ).run_tests()  # 99!
-        return
-
-    if a["action"] == "see":
-        doctor(default_directory=a["dir"])
-        return
-
-    raise JetError("Unrecognized arguments")
+#__version__ = importlib.metadata.version("jet")
 
 
 def main():
-    """JET simple clean minimalistic testing library.
-    Testing library or python with emphasis on presentation and minimalism
-    """
-
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(__doc__),
+    )
 
     parser.add_argument(
         "action",
@@ -59,6 +27,8 @@ def main():
         run overwrites previous diagnostics reports. This might change in
         the future
         """,
+        choices=["run", "see"],
+        default="run",
     )
 
     parser.add_argument(
@@ -68,6 +38,7 @@ def main():
         Skip initial selection, run all found modules.
         """,
         action="store_true",
+        default=False,
     )
 
     parser.add_argument(
@@ -75,7 +46,7 @@ def main():
         "--files",
         nargs="+",
         help="""
-        Consider only the specified list of python modules. Path is considered to be relative.
+        List of modules to consider only instead of entire directory.
         """,
         metavar="\b",
     )
@@ -88,6 +59,7 @@ def main():
         when not supplied.
         """,
         metavar="\b",
+        default=os.getcwd() + "/tests",
     )
 
     parser.add_argument(
@@ -96,8 +68,9 @@ def main():
         help="""
         Number of processes to use in parallel when running tests. Defaults to one.
         """,
-        type=job_int,
+        type=int,
         metavar="\b",
+        default=1,
     )
 
     parser.add_argument(
@@ -107,17 +80,57 @@ def main():
         Disable outputing test results as they run.
         """,
         action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-p",
+        "--percentage",
+        help="""
+        Whether to show progress as a percentage instead of count.
+        """,
+        action="store_true",
+    )
+    parser.add_argument(
+        "-c",
+        "--color",
+        help="""
+        Main color as a 256 color code. Default is 134
+        """,
+        type=str,
+        default="134",
+        metavar="\b",
     )
 
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s {version}".format(version=__version__),
+        #version="%(prog)s {version}".format(version=__version__),
+        version=2,
     )
 
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
-    dispatcher(args)
+    session = JetConfig(
+        path=args.dir,
+        files=args.files,
+        run_all=args.all,
+        quiet=args.quiet,
+        color=args.color,
+        show_percentage=args.percentage,
+        n_jobs=args.jobs,
+        second_color="rgb(249,38,114)",
+        test_colors={
+            "Pass": "green",
+            "Failed": "red3",
+            "Error": "orange3",
+            "Warning": "yellow",
+        },
+    )
+
+    if args.action == "run":
+        Run(config=session)
+    # lif args.action =="see":
+    #    See(config = session)
 
 
 if __name__ == "__main__":

@@ -17,8 +17,8 @@ def choose(
 
     if add_all:
         titles.insert(0, "All")
-        descriptions.indser(0,all_description)
-
+        descriptions.insert(0, all_description)
+    #if limit ==1 => indentation=0
     items = [
         prep_item(
             title,
@@ -29,7 +29,6 @@ def choose(
         )
         for title, description in zip(titles, descriptions)
     ]
-
 
     subprocess.run(["echo"])
 
@@ -92,7 +91,7 @@ def choose(
 
 def prep_description(
     description: str, indentation: str, max_length: int, line_width: int
-):
+) -> str:
     if description is None:
         description = "..."
     # drop new lines
@@ -109,7 +108,7 @@ def prep_description(
 
 def prep_item(
     title: str, description: str, indentation: str, max_length: int, line_width: int
-):
+) -> str:
     title = subprocess.run(["gum", "style", title], stdout=subprocess.PIPE).stdout
     desc = subprocess.run(
         [
