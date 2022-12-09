@@ -1,6 +1,8 @@
 # Dillinger
 ## _The Last Markdown Editor, Ever_
 
+python jet/main.py run --color "#AFBEE1" --background "#64708D"
+
 [![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)

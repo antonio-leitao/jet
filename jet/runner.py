@@ -1,6 +1,5 @@
 """Test script finder
-Finds all scripts .py that start with test_ in the folder tests.
-return all function name too?
+Finds all scripts .py that start with test_ and runs the test functions.
 """
 # standard imports
 import os
@@ -12,11 +11,13 @@ import warnings
 import json
 import io
 from contextlib import redirect_stdout
-import multiprocessing
+from typing import Any
+from dataclasses import asdict
 
 # self imports
-import jet.checks as jetcheck
-from jet.mod_selection import choose_modules
+import ui as ui
+import checks as jetcheck
+from classes import RunConfig, Module, Test, Error
 
 # dependencies
 from rich.text import Text
@@ -29,7 +30,6 @@ from rich.progress import (
     TextColumn,
     BarColumn,
 )
-
 
 warnings.filterwarnings("error")
 
@@ -99,22 +99,18 @@ def _importfile(path):
         raise ErrorDuringImport(path, sys.exc_info())
 
 
-def _clean_name(path):
+def _clean_name(path: str) -> str:
     mod_name = os.path.split(path)[-1].removesuffix(".py").removeprefix("test_")
-    mod_name = mod_name.split("_")
-    mod_name = " ".join(mod_name)
+    mod_name = mod_name.replace("_", " ")
     return mod_name.capitalize()
 
 
-# path comes in -> module path, name, description and module
-def _get_module_data(path):
+def _get_module_data(path: str) -> Module:
     module = _importfile(path)
-    name = _clean_name(path)
-    data = {"doc": module.__doc__, "path": path, "module": module}
-    return name, data
+    return Module(name=_clean_name(path), doc=module.__doc__, path=path, module=module)
 
 
-def _is_jsonable(x):
+def _is_jsonable(x: Any) -> bool:
     try:
         json.dumps(x)
         return True
@@ -122,7 +118,7 @@ def _is_jsonable(x):
         return False
 
 
-def _clean_variables(variables):
+def _clean_variables(variables: dict) -> dict:
     if variables is None:
         return variables
     if len(variables) == 0:
@@ -138,218 +134,246 @@ def _clean_variables(variables):
     return new_variables
 
 
-def _catch(f, exc, info, variables):
-    details = {
-        "mod_path": info.filename,
-        "line": info.lineno,
-        "locals": _clean_variables(variables),
-        "description": str(exc),
-        "type": type(exc).__name__,
-        "out": f.getvalue(),
-    }
-    return details
+def _track(error: Error, tracker: dict) -> dict:
+    if error is None:
+        tracker["Pass"] += 1
+    else:
+        tracker[error.type] += 1
+    return tracker
 
 
-class Runner:
-    def __init__(
-        self,
-        supplied=[],
-        accent_color="134",  # 99 #38
-        second_color="rgb(249,38,114)",
-        quiet=False,
-        run_all=False,
-        default_directory=None,
-        show_percentage=False,
-        n_jobs=None,
-    ):
-        self.modules = {}
-        self.supplied = supplied
-        self.run_all = run_all
-        self.quiet = quiet
-        self.colors = {
-            "Pass": "green",  # 92m
-            "Failed": "red3",
-            "Error": "orange3",
-            "Warning": "yellow",
-        }
-        self.indentation = "    "
-        self.accent_color = accent_color
-        self.show_percentage = show_percentage
+def get_modules(path: str, files: list) -> list[Module]:
+    modules = []
+    if not files:
+        for dirpath, subdirs, files in os.walk(path):
+            for x in files:
+                if not (x.endswith(".py") and x.startswith("test_")):
+                    continue
+                modules.append(_get_module_data(os.path.join(dirpath, x)))
+        return modules
 
-        self.second_color = second_color
-        self.n_jobs = n_jobs
-        if self.n_jobs is None:
-            self.n_jobs = multiprocessing.cpu_count() * 4
+    for x in files:
+        x = os.path.split(x)[-1]
+        if not (x.endswith(".py") and x.startswith("test_")):
+            continue
+        modules.append(_get_module_data(os.path.join(dirpath, x)))
+    return modules
 
-        self.default_directory = default_directory
-        if self.default_directory is None:
-            self.default_directory = os.getcwd() + "/tests"
 
-    def get_modules(self, path=None):
-        if not self.supplied:
-            if path is None:
-                path = self.default_directory
-            for dirpath, subdirs, files in os.walk(path):
-                for x in files:
-                    if x.endswith(".py") and x.startswith("test_"):
-                        name, data = _get_module_data(os.path.join(dirpath, x))
-                        self.modules[name] = data
-            return
+def filter_modules(
+    modules: list[Module], foreground: str, background: str
+) -> list[Module]:
 
-        # if supplied
-        for x in self.supplied:
-            if x.endswith(".py"):
-                name, data = _get_module_data(self.default_directory + "/" + x)
-                self.modules[name] = data
+    choices = ui.choose(
+        title_text=" Choose Modules ",
+        titles=[mod.name for mod in modules],
+        descriptions=[mod.doc for mod in modules],
+        summary=f"Found {len(modules)} modules",
+        add_all=True,
+        all_description="Run all test modules",
+        limit=None,
+        color=foreground,
+        background=background,
+    )
 
-    def prompt_module_choice(self):
-        options = [{"title": k, "desc": v["doc"]} for k, v in self.modules.items()]
-        options.insert(0, {"title": "Run All", "desc": "Run all test modules found."})
-        return choose_modules(options, color=self.accent_color)
+    if "All" in choices:
+        return modules
 
-    def fetch_modules(self):
-        self.get_modules()
-        if self.run_all:
-            return
-        choices = self.prompt_module_choice()
-        if "Run All" in choices:
-            return
-        self.modules = {k: v for k, v in self.modules.items() if k in choices}
-        return
+    return [mod for mod in modules if mod.name in choices]
 
-    def fetch_module_routines(self, module, module_name):
-        routines = []
-        for key, value in inspect.getmembers(module, inspect.isroutine):
-            if key.startswith("test"):
-                routine_data = {
-                    "routine": value,
-                    "name": _clean_name(value.__name__),
-                    "doc": value.__doc__ if value.__doc__ is not None else "",
-                    "module": module_name,
-                }
-                routines.append(routine_data)
-        return routines
 
-    def fetch_tests(self):
-        self.fetch_modules()
-        tests = []
-        for module_name in self.modules.keys():
-            routines = self.fetch_module_routines(
-                self.modules[module_name]["module"], module_name
-            )
-            tests.extend(routines)
-        return tests
-
-    def archive_routine_results(self, routine, result, details):
-        test_result = {k: v for k, v in routine.items() if k != "routine"}
-        test_result["result"] = result
-        test_result["diagnosis"] = details
-        self.results["tests"].append(test_result)
-
-    def dump_results(self):
-        with open(self.default_directory + "/jet.results.json", "w") as fp:
-            json.dump(self.results, fp)
-
-    def do_jet_checks(self, routine):
-        # add custom tests and checks here.
-        result, details = jetcheck.arguments(routine)
-        return result, details
-
-    def evaluate(self, routine):
-        result, details = self.do_jet_checks(routine)
-        if result is not None:
-            return result, details
-        f = io.StringIO()
-        try:
-            with redirect_stdout(f):
-                routine()
-            return "Pass", None
-        except AssertionError as exc:
-            info = traceback.extract_tb(sys.exc_info()[2])[-1]
-            variables = inspect.trace()[-1][0].f_locals
-            details = _catch(f, exc, info, variables)
-            return "Failed", details
-
-        except RuntimeWarning as exc:
-            info = traceback.extract_tb(sys.exc_info()[2])[-1]
-            variables = inspect.trace()[-1][0].f_locals
-            details = _catch(f, exc, info, variables)
-            return "Warning", details
-
-        except Exception as exc:
-            info = traceback.extract_tb(sys.exc_info()[2])[-1]
-            variables = inspect.trace()[-1][0].f_locals
-            details = _catch(f, exc, info, variables)
-            return "Error", details
-
-    def run_tests(self):
-        console = Console(theme=Theme({"progress.percentage": self.second_color}))
-        progress_column = (
-            TaskProgressColumn() if self.show_percentage else CompletedColumn()
-        )
-        tests = self.fetch_tests()
-        n_tests = len(tests)
-        self.results = {
-            "summary": {
-                "n_tests": n_tests,
-                "Pass": 0,
-                "Failed": 0,
-                "Warning": 0,
-                "Error": 0,
-            },
-            "tests": [],
-        }
-
-        with Progress(
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            progress_column,
-            console=console,
-        ) as progress:
-
-            task = progress.add_task("Running tests", total=n_tests)
-
-            for routine in tests:
-                # verbose with some extent
-                result, details = self.evaluate(routine["routine"])
-                self.results["summary"][result] += 1
-
-                # archive only errors, warning and fails
-                if result != "Pass":
-                    self.archive_routine_results(routine, result, details)
-
-                if not self.quiet:
-                    progress.console.print(self.verbose_two(result, routine["routine"]))
-                progress.advance(task)
-            summary = self.verbose_one()
-            if summary != "Summary":
-                progress.console.print(summary)
-
-        sys.stdout.write("\33[A")
-        sys.stdout.write("\33[J\r")
-        # subprocess.run(["printf '\33[A[2K\r'"], shell=True)  # erase progress line
-        self.dump_results()
-
-    def verbose_one(self):
-        s = "Summary: "
-        for result in ["Pass", "Failed", "Warning", "Error"]:
-            n = self.results["summary"][result]
-            if n == 0:
+def get_routines(modules: list[Module]) -> list[Test]:
+    tests = []
+    for module in modules:
+        for key, value in inspect.getmembers(module.module, inspect.isroutine):
+            if not key.startswith("test"):
                 continue
-            s += f"[{self.colors[result]}]{str(n)} {result.lower()}[/{self.colors[result]}], "
-        return s[:-2]
+            test = Test(
+                name=_clean_name(value.__name__),
+                doc=value.__doc__
+                if value.__doc__ is not None
+                else _clean_name(value.__name__),
+                routine=value,
+                module=Module(name=module.name, doc=module.doc, path=module.path),
+            )
 
-    def verbose_two(self, result, routine):
-        # TODO change color names to init
-        doc = routine.__doc__
-        if doc is None:
-            doc = _clean_name(routine.__name__)
-        if result == "Pass":
-            tick = "\u2713"
-            return f"[{self.colors['Pass']}]{tick}[/{self.colors['Pass']}] {doc}"
-        if result == "Failed":
-            cross = "\u2717"
-            return f"[{self.colors['Failed']}]{cross}[/{self.colors['Failed']}] {doc}"
-        else:
-            mark = "?"
-            return f"[{self.colors['Warning']}]{mark}[/{self.colors['Warning']}] {doc}"
+            tests.append(test)
+
+    return tests
+
+
+def run_tests(
+    tests: list[Test],
+    show_percentage: bool,
+    second_color: str,
+    quiet: bool,
+    color_dict: dict,
+) -> tuple[list[Error], str]:
+
+    # maybe collapase this as its a bit ugly the second color thing
+    console = Console(theme=Theme({"progress.percentage": second_color}))
+    progress_column = TaskProgressColumn() if show_percentage else CompletedColumn()
+    n_tests = len(tests)
+    results = []
+    tracker = {
+        "n_tests": n_tests,
+        "Pass": 0,
+        "Failed": 0,
+        "Warning": 0,
+        "Error": 0,
+    }
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        progress_column,
+        console=console,
+    ) as progress:
+
+        task = progress.add_task("Running tests", total=n_tests)
+        for test in tests:
+            error = evaluate(test)
+            tracker = _track(error, tracker)
+
+            if not quiet:
+                if error is None:
+                    error_type = "Pass"
+                    text = test.doc
+                else:
+                    error_type = error.type
+                    text = error.description if error.description else test.name
+                progress.console.print(
+                    build_summary_line(
+                        error_type=error_type,
+                        text=text,
+                        color_dict=color_dict,
+                    )
+                )
+
+            if error is not None:
+                results.append(error)
+
+            progress.advance(task)
+
+        summary, summary_bw = build_summary(tracker, color_dict)
+        if summary != "JET":
+            progress.console.print(summary)
+
+    sys.stdout.write("\33[A")
+    sys.stdout.write("\33[J\r")
+    return results, summary_bw
+
+
+def do_pre_checks(test: Test) -> Error | None:
+    # add custom tests and checks here.
+    error = jetcheck.arguments(test)
+    return error
+
+
+def evaluate(test: Test) -> Error | None:
+    error = do_pre_checks(test)
+    if error is not None:
+        return error
+    captured_output = io.StringIO()
+    try:
+        with redirect_stdout(captured_output):
+            test.routine()
+        return None
+    except AssertionError as exception:
+        info = traceback.extract_tb(sys.exc_info()[2])[-1]
+        variables = inspect.trace()[-1][0].f_locals
+        return Error(
+            type="Failed",
+            name=type(exception).__name__,
+            description=str(exception),
+            line=info.lineno,
+            variables=_clean_variables(variables),
+            out=captured_output.getvalue(),
+            test=Test(name=test.name, doc=test.doc, module=test.module),
+        )
+    except RuntimeWarning as exception:
+        info = traceback.extract_tb(sys.exc_info()[2])[-1]
+        variables = inspect.trace()[-1][0].f_locals
+        return Error(
+            type="Warning",
+            name=type(exception).__name__,
+            description=str(exception),
+            line=info.lineno,
+            variables=_clean_variables(variables),
+            out=captured_output.getvalue(),
+            test=Test(name=test.name, doc=test.doc, module=test.module),
+        )
+
+    except Exception as exception:
+        info = traceback.extract_tb(sys.exc_info()[2])[-1]
+        variables = inspect.trace()[-1][0].f_locals
+        return Error(
+            type="Error",
+            name=type(exception).__name__,
+            description=str(exception),
+            line=info.lineno,
+            variables=_clean_variables(variables),
+            out=captured_output.getvalue(),
+            test=Test(name=test.name, doc=test.doc, module=test.module),
+        )
+
+
+def build_summary(tracker: dict, color_dict: dict) -> tuple[str, str]:
+    s = "JET: "
+    bw = "JET: "
+    for result in ["Pass", "Failed", "Warning", "Error"]:
+        n = tracker[result]
+        if n == 0:
+            continue
+        s += f"[{color_dict[result]}]{str(n)} {result.lower()}[/{color_dict[result]}], "
+        bw += f"{str(n)} {result.lower()}, "
+    return s[:-2], bw[:-2]
+
+
+def build_summary_line(error_type: str, text: str, color_dict: dict) -> str:
+    color = color_dict[error_type]
+    if error_type == "Pass":
+        tick = "\u2713"
+        return f"[{color}]{tick}[/{color}] {text}"
+    if error_type == "Failed":
+        cross = "\u2717"
+        return f"[{color}]{cross}[/{color}] {text}"
+    if error_type == "Error":
+        return f"[{color}]![/{color}] {text}"
+    return f"[{color}]?[/{color}] {text}"
+
+
+def dump_results(results: list[Error], summary: str, path: str) -> None:
+
+    dictionary = {"summary": summary, "tests": [asdict(r) for r in results]}
+    with open(path + "/jet.results.json", "w") as fp:
+        json.dump(dictionary, fp)
+
+
+def Run(config: RunConfig) -> None:
+    color_dict = {
+        "Pass": config.pass_color,
+        "Failed": config.failed_color,
+        "Error": config.error_color,
+        "Warning": config.warning_color,
+    }
+
+    modules = get_modules(config.path, config.files)
+
+    if not config.run_all:
+        modules = filter_modules(
+            modules=modules,
+            foreground=config.foreground,
+            background=config.background,
+        )
+
+    tests = get_routines(modules)
+
+    # if config.n_jobs ==1:
+    results, summary = run_tests(
+        tests,
+        show_percentage=config.show_percentage,
+        second_color=config.second_color,
+        quiet=config.quiet,
+        color_dict=color_dict,
+    )
+    dump_results(results, summary, config.path)

@@ -3,10 +3,12 @@ import subprocess
 
 
 def choose(
+    title_text: str,
     titles: list[str],
     descriptions: list[str],
     summary: str,
     limit: int | None,
+    background: str,
     color: str,
     add_all: bool = False,
     all_description: None | str = None,
@@ -18,7 +20,8 @@ def choose(
     if add_all:
         titles.insert(0, "All")
         descriptions.insert(0, all_description)
-    #if limit ==1 => indentation=0
+    if limit == 1:
+        indentation = "  "
     items = [
         prep_item(
             title,
@@ -37,11 +40,11 @@ def choose(
             "gum",
             "style",
             "--background",
-            "53",  # 161 #color?
+            background,  # 161 #color? #53
             "--margin",
             "0 4",
             "--bold",
-            " Choose Modules ",
+            title_text,
         ]
     )
 

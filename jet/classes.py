@@ -1,47 +1,65 @@
-from typing import NamedTuple, Any
+from dataclasses import dataclass
+from rich.console import Console
+from typing import Any
 
 
 class JetError(Exception):
     pass
 
 
-# maybe put these somewhere else?
-class JetConfig(NamedTuple):
+@dataclass(frozen=True)
+class JetConfig:
+    foreground: str  # "134"
+    background: str
+    pass_color: str
+    failed_color: str
+    error_color: str
+    warning_color: str
+    second_color: str
+
+
+@dataclass(frozen=True)
+class RunConfig(JetConfig):
+    run_all: bool
     path: str
     files: list[str]
-    run_all: bool
+    n_jobs: int
     quiet: bool
-    color: str = "134"
-    second_color: str = "rgb(249,38,114)"
-    show_percentage: bool = False
-    n_jobs: int = 1
-    test_colors: dict = {
-        "Pass": "green",  # 92m
-        "Failed": "red3",
-        "Error": "orange3",
-        "Warning": "yellow",
-    }
+    show_percentage: bool
 
 
-class Module(NamedTuple):
+@dataclass(frozen=True)
+class SeeConfig(JetConfig):
+    doc_width: int
+    text_width: int
+    pad: int
+    buffer: int
+    path: str
+    console: Console
+
+
+@dataclass(frozen=True)
+class Module:
     name: str
     doc: str
     path: str
-    module: Any
+    module: Any | None = None
 
 
-class Test(NamedTuple):
+@dataclass(frozen=True)
+class Test:
     name: str
     doc: str
-    routine: Any
+    module: Module
+    routine: Any | None = None
 
 
-class Result(NamedTuple):
-    result: str
-    doc: str
-    alias: str | None = None
-    description: str | None = None
-    mod_path: str | None = None
-    line: str | None = None
-    variables: dict | None = None
-    out: str | None = None
+@dataclass(frozen=True)
+class Error:
+    type: str  # pass/fail/error/warning
+    name: str  # alias
+    description: str
+    line: int
+    variables: dict
+    out: str
+    test: Test

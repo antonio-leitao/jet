@@ -3,134 +3,223 @@ Simple, clean minimalistic testing library.
 Testing library for python with emphasis on simplicity and presentation.
 """
 
+# standard
 import argparse
-
-from new_runner import Run
-from classes import JetConfig
-import importlib.metadata
-import textwrap
 import os
+import textwrap
+from dataclasses import asdict
+import importlib.metadata
 
-#__version__ = importlib.metadata.version("jet")
+# self
+from runner import Run
+from new_doctor_seer import See
+from classes import JetConfig, RunConfig, SeeConfig
+
+# dependencies
+from rich.console import Console
+
+# __version__ = importlib.metadata.version("jet")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent(__doc__),
-    )
-
-    parser.add_argument(
-        "action",
-        help="""Jet action: [run, check].
-        Either run new tests or diagnose errors from previous ones. Each
-        run overwrites previous diagnostics reports. This might change in
-        the future
-        """,
-        choices=["run", "see"],
-        default="run",
-    )
-
-    parser.add_argument(
+def add_run_subparser(subparsers):
+    run = subparsers.add_parser("run", help="Run tests")
+    run.add_argument(
         "-a",
         "--all",
-        help="""
-        Skip initial selection, run all found modules.
+        help="""Run all test modules. Skips intial module selection.
         """,
         action="store_true",
         default=False,
     )
-
-    parser.add_argument(
-        "-f",
-        "--files",
-        nargs="+",
-        help="""
-        List of modules to consider only instead of entire directory.
-        """,
-        metavar="\b",
-    )
-
-    parser.add_argument(
+    run.add_argument(
         "-d",
         "--dir",
-        help="""
-        Path to tests directory. Defaults to working directory + /tests
-        when not supplied.
+        help="""Path to tests directory. Defaults to /tests when not supplied.
         """,
         metavar="\b",
         default=os.getcwd() + "/tests",
     )
 
-    parser.add_argument(
+    run.add_argument(
+        "-f",
+        "--files",
+        nargs="+",
+        help="""List of modules to consider only instead of entire directory.
+        """,
+        metavar="\b",
+    )
+    run.add_argument(
         "-j",
-        "--jobs",
-        help="""
-        Number of processes to use in parallel when running tests. Defaults to one.
+        "--n-jobs",
+        help="""Number of processes to use in parallel when running tests. Defaults to one.
         """,
         type=int,
-        metavar="\b",
         default=1,
+        metavar="\b",
     )
 
-    parser.add_argument(
+    run.add_argument(
         "-q",
         "--quiet",
-        help="""
-        Disable outputing test results as they run.
+        help="""Disable outputing test results as they run.
         """,
         action="store_true",
         default=False,
     )
-    parser.add_argument(
+    run.add_argument(
         "-p",
         "--percentage",
-        help="""
-        Whether to show progress as a percentage instead of count.
+        help="""Whether to show progress as a percentage instead of count.
         """,
         action="store_true",
     )
-    parser.add_argument(
-        "-c",
-        "--color",
-        help="""
-        Main color as a 256 color code. Default is 134
+
+
+def handle_run(args, session):
+    config = RunConfig(
+        run_all=args.all,
+        path=args.dir,
+        files=args.files,
+        n_jobs=args.n_jobs,
+        quiet=args.quiet,
+        show_percentage=args.percentage,
+        **asdict(session),
+    )
+    # print(config)
+    Run(config=config)
+
+
+def add_see_subparser(subparsers):
+    see = subparsers.add_parser("see", help="See test results")
+    see.add_argument(
+        "--doc-width",
+        help="""Width (number of columns collumns) of report doc.
         """,
+        type=int,
+        default=88,
+    )
+
+    see.add_argument(
+        "--buffer",
+        help="""Number of lines of code to show in the report.
+        """,
+        type=int,
+        default=8,
+    )
+
+    see.add_argument(
+        "--text-width",
+        help="""Width (number of columns collumns) of text blocks in report.
+        """,
+        type=int,
+        default=8,
+    )
+    see.add_argument(
+        "-d",
+        "--dir",
+        help="""Path to tests directory. Defaults to /tests when not supplied.
+        """,
+        metavar="\b",
+        default=os.getcwd() + "/tests",
+    )
+
+
+def handle_see(args, session):
+    _pad = int(max([0, os.get_terminal_size().columns - args.doc_width]) / 2)
+
+    config = SeeConfig(
+        pad=_pad,
+        path=args.dir,
+        doc_width=os.get_terminal_size().columns - (12 + 2 * _pad),
+        text_width=args.text_width,
+        buffer=args.buffer,
+        console=Console(),
+        **asdict(session),
+    )
+    See(config=config)
+
+
+def main_parser():
+    # default args
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(__doc__),
+    )
+    # default args
+    parser.add_argument(
+        "--version",
+        action="version",
+        # version="%(prog)s {version}".format(version=__version__),
+        version=2,
+    )
+    parser.add_argument(
+        "--foreground",
+        help="Main foreground color",
         type=str,
         default="134",
         metavar="\b",
     )
-
     parser.add_argument(
-        "--version",
-        action="version",
-        #version="%(prog)s {version}".format(version=__version__),
-        version=2,
+        "--background",
+        help="Main background color",
+        type=str,
+        default="53",
+        metavar="\b",
+    )
+    parser.add_argument(
+        "--pass-color",
+        help="Color for passed tests.",
+        type=str,
+        default="green",
+        metavar="\b",
+    )
+    parser.add_argument(
+        "--failed-color",
+        help="Color for failed tests.",
+        type=str,
+        default="red3",
+        metavar="\b",
+    )
+    parser.add_argument(
+        "--error-color",
+        help="Color for tests that raised unexpected errors.",
+        type=str,
+        default="orange3",
+        metavar="\b",
+    )
+    parser.add_argument(
+        "--warning-color",
+        help="Color for tests that result raised warnings.",
+        type=str,
+        default="yellow",
+        metavar="\b",
     )
 
+    # command args
+    subparsers = parser.add_subparsers(dest="command")
+    add_run_subparser(subparsers)
+    add_see_subparser(subparsers)
+    return parser
+
+
+def main():
+    parser = main_parser()
     args = parser.parse_args()
 
     session = JetConfig(
-        path=args.dir,
-        files=args.files,
-        run_all=args.all,
-        quiet=args.quiet,
-        color=args.color,
-        show_percentage=args.percentage,
-        n_jobs=args.jobs,
+        foreground=args.foreground,
+        background=args.background,
+        pass_color=args.pass_color,
+        failed_color=args.failed_color,
+        error_color=args.error_color,
+        warning_color=args.warning_color,
         second_color="rgb(249,38,114)",
-        test_colors={
-            "Pass": "green",
-            "Failed": "red3",
-            "Error": "orange3",
-            "Warning": "yellow",
-        },
     )
 
-    if args.action == "run":
-        Run(config=session)
-    # lif args.action =="see":
-    #    See(config = session)
+    if args.command == "run":
+        handle_run(args, session)
+    elif args.command == "see":
+        handle_see(args, session)
 
 
 if __name__ == "__main__":

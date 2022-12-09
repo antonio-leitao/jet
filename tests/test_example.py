@@ -36,6 +36,5 @@ def test_pass():
 
 def test_standard_output():
     """This function should always fail and has standard output"""
-
     print("this is a standard output")
     assert 1 == 2

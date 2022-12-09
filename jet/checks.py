@@ -1,32 +1,33 @@
+#standard imports
 import inspect
-from typing import Any
-from classes import Result, Test
+#self imports
+from classes import Error, Test
 
 
-def _make_details(test: Test, description: str) -> Result:
+def _wrap_error(test: Test, description: str) -> Error:
 
-    details = Result(
-        result="Error",
-        doc=test.doc,
-        alias="JetError",
+    error = Error(
+        type="Error",
+        name="JetError",
         description=description,
-        mod_path=inspect.getfile(test.routine),
-        out="",
+        line=inspect.getsourcelines(test.routine)[1],
         variables=[],
+        out="",
+        test=Test(name=test.name, doc=test.doc, module=test.module),
     )
-    return details
+    return error
 
 
-def arguments(test: Test) -> Result:
+def arguments(test: Test) -> Error | None:
     arguments = inspect.getfullargspec(test.routine)
     if len(arguments.args) == 0:
-        return Result(result="Pass", doc=test.doc)
-    result = _make_details(
+        return None
+    error = _wrap_error(
         test,
         "Could not run test. Please supply all arguments as default arguments or none at all",
     )
     if arguments.defaults is None:
-        return result
+        return error
     if len(arguments.args) != len(arguments.defaults):
-        return result
-    return Result(result="Pass", doc=test.doc)
+        return error
+    return None
