@@ -2,12 +2,12 @@ README.md
 pyproject.toml
 jet/__init__.py
 jet/checks.py
-jet/doctor.py
+jet/classes.py
 jet/main.py
-jet/mod_selection.py
+jet/report.py
 jet/runner.py
 jet/seer.py
-jet/test_selection.py
+jet/ui.py
 jet.egg-info/PKG-INFO
 jet.egg-info/SOURCES.txt
 jet.egg-info/dependency_links.txt

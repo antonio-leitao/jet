@@ -130,7 +130,6 @@ def See(config: SeeConfig) -> None:
     results, summary = load_results(config.path)
     result = choose_result(results, summary, config.foreground, config.background)
     color = color_dict[result.type]
-    print(color)
     report = create_report(result, config, color)
     doc = print_report(report, config.doc_width, config.console)
     display_report(doc, pad=config.pad, color=color_dict[result.type])
