@@ -2,7 +2,7 @@
 import inspect
 
 # self imports
-from classes import Error, Test
+from jet.classes import Error, Test
 
 
 def _wrap_error(test: Test, description: str) -> Error:

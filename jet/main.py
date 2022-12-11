@@ -11,14 +11,14 @@ from dataclasses import asdict
 import importlib.metadata
 
 # self
-from runner import Run
-from seer import See
-from classes import JetConfig, RunConfig, SeeConfig
+from jet.runner import Run
+from jet.seer import See
+from jet.classes import JetConfig, RunConfig, SeeConfig
 
 # dependencies
 from rich.console import Console
 
-# __version__ = importlib.metadata.version("jet")
+__version__ = importlib.metadata.version("jet")
 
 
 def add_run_subparser(subparsers):
@@ -152,8 +152,7 @@ def main_parser():
     parser.add_argument(
         "--version",
         action="version",
-        # version="%(prog)s {version}".format(version=__version__),
-        version=2,
+        version="%(prog)s {version}".format(version=__version__),
     )
     parser.add_argument(
         "--foreground",

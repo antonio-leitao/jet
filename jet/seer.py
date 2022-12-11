@@ -3,15 +3,15 @@ import subprocess
 import json
 
 # self imports
-import ui as ui
-from report import (
+import jet.ui as ui
+from jet.report import (
     report_result,
     observation,
     captured_output,
     function_and_locals_inline,
     function_and_locals_parallel,
 )
-from classes import SeeConfig, JetError, Test, Module, Error
+from jet.classes import SeeConfig, JetError, Test, Module, Error
 
 # dependencies
 from rich.console import Console
