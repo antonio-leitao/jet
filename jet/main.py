@@ -12,7 +12,7 @@ import importlib.metadata
 
 # self
 from runner import Run
-from new_doctor_seer import See
+from seer import See
 from classes import JetConfig, RunConfig, SeeConfig
 
 # dependencies
@@ -92,11 +92,20 @@ def handle_run(args, session):
 def add_see_subparser(subparsers):
     see = subparsers.add_parser("see", help="See test results")
     see.add_argument(
+        "-d",
+        "--dir",
+        help="""Path to tests directory. Defaults to /tests when not supplied.
+        """,
+        metavar="\b",
+        default=os.getcwd() + "/tests",
+    )
+    see.add_argument(
         "--doc-width",
         help="""Width (number of columns collumns) of report doc.
         """,
         type=int,
-        default=88,
+        default=120,
+        metavar="\b",
     )
 
     see.add_argument(
@@ -105,6 +114,7 @@ def add_see_subparser(subparsers):
         """,
         type=int,
         default=8,
+        metavar="\b",
     )
 
     see.add_argument(
@@ -112,15 +122,8 @@ def add_see_subparser(subparsers):
         help="""Width (number of columns collumns) of text blocks in report.
         """,
         type=int,
-        default=8,
-    )
-    see.add_argument(
-        "-d",
-        "--dir",
-        help="""Path to tests directory. Defaults to /tests when not supplied.
-        """,
+        default=60,
         metavar="\b",
-        default=os.getcwd() + "/tests",
     )
 
 
@@ -170,28 +173,28 @@ def main_parser():
         "--pass-color",
         help="Color for passed tests.",
         type=str,
-        default="green",
+        default="#008700",  # green
         metavar="\b",
     )
     parser.add_argument(
         "--failed-color",
         help="Color for failed tests.",
         type=str,
-        default="red3",
+        default="#d70000",  # red3
         metavar="\b",
     )
     parser.add_argument(
         "--error-color",
         help="Color for tests that raised unexpected errors.",
         type=str,
-        default="orange3",
+        default="#d78700",  # orange3
         metavar="\b",
     )
     parser.add_argument(
         "--warning-color",
         help="Color for tests that result raised warnings.",
         type=str,
-        default="yellow",
+        default="#ffff00",  # yellow
         metavar="\b",
     )
 

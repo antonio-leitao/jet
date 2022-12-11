@@ -1,6 +1,7 @@
-#standard imports
+# standard imports
 import inspect
-#self imports
+
+# self imports
 from classes import Error, Test
 
 
