@@ -1,6 +1,6 @@
 [project]
 name = "jet"
-version = "0.0.1"
+version = "0.0."
 authors = [
   { name="António Leitão", email="aleitao@novaims.unl.pt" },
 ]

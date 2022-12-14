@@ -4,7 +4,7 @@ import re
 import textwrap
 
 # self
-from classes import Error
+from jet.classes import Error
 
 # dependencies
 from rich.panel import Panel
@@ -143,7 +143,7 @@ def function_and_locals_inline(
     )
     dos = _center(
         Panel(
-            Panel(locals_panel(result, buffer, console), title="Local variables"),
+            locals_panel(result, buffer, console),
             title="Local variables",
             width=text_width + 4,
         )

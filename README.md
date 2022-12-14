@@ -1,7 +1,7 @@
 # Dillinger
 ## _The Last Markdown Editor, Ever_
 
-python jet/main.py run --color "#AFBEE1" --background "#64708D"
+JET_JetTesting % python jet/main.py --foreground "#AFBEE1" --background "#64708D" --pass-color "#527251" --failed-color "#A46060"
 
 [![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)
 

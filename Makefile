@@ -1,3 +1,4 @@
+
 help:
 	@echo "\nAvailable commnads:"
 	@echo ">> clean : removes all pycaches" | sed 's/^/   /'
@@ -23,3 +24,19 @@ release:
 add:
 	@PACKAGE=$$(gum input --placeholder "Type package name");\
 	echo "installing $$PACKAGE"
+
+update:
+	@VERSION=$(shell grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3);\
+	IFS=. read major minor patch <<<"$$VERSION";\
+	echo "$$major.$$minor.$$patch";\
+	echo $$(( $(major) + 1 ))
+
+	@UPDATE=$$(gum choose "Major" "Minor" "Patch" --limit "1" --cursor.margin "0 1" --cursor.foreground "");\
+	echo "$$UPDATE"
+
+upgrade:
+	@NUM=$(2+1);\
+	NEW="0.0.$($(NUM)+1)";\
+	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
+	
+	

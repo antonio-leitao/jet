@@ -290,7 +290,7 @@ def evaluate(test: Test) -> Error | None:
             out=captured_output.getvalue(),
             test=Test(name=test.name, doc=test.doc, module=test.module),
         )
-    except RuntimeWarning as exception:
+    except Warning as exception:
         info = traceback.extract_tb(sys.exc_info()[2])[-1]
         variables = inspect.trace()[-1][0].f_locals
         return Error(
@@ -320,7 +320,7 @@ def evaluate(test: Test) -> Error | None:
 def build_summary(tracker: dict, color_dict: dict) -> tuple[str, str]:
     s = "JET: "
     bw = "JET: "
-    for result in ["Pass", "Failed", "Warning", "Error"]:
+    for result in ["Pass", "Failed", "Error", "Warning"]:
         n = tracker[result]
         if n == 0:
             continue
