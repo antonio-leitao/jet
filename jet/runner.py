@@ -232,6 +232,7 @@ def run_tests(
         task = progress.add_task("Running tests", total=n_tests)
         for test in tests:
             error = evaluate(test)
+            progress.update(task, advance=1, refresh=True)
             tracker = _track(error, tracker)
 
             if not quiet:
@@ -251,8 +252,6 @@ def run_tests(
 
             if error is not None:
                 results.append(error)
-
-            progress.advance(task)
 
         summary, summary_bw = build_summary(tracker, color_dict)
         if summary != "JET":

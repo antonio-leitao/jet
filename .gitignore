@@ -5,3 +5,4 @@
 dist
 testdata
 *.egg-info
+tapes
