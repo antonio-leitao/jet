@@ -32,7 +32,3 @@ def test_timings_of_calculation():
     """The function should not exeed 0.5 seconds."""
     time.sleep(1)
 
-
-def test_username(username):
-    time.sleep(0.5)
-    assert username == "Mike Wazowski"

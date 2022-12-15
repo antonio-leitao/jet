@@ -156,7 +156,7 @@ def get_modules(path: str, files: list) -> list[Module]:
         x = os.path.split(x)[-1]
         if not (x.endswith(".py") and x.startswith("test_")):
             continue
-        modules.append(_get_module_data(os.path.join(dirpath, x)))
+        modules.append(_get_module_data(os.path.join(path, x)))
     return modules
 
 
