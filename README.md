@@ -1,6 +1,5 @@
 # JET
-
-## _Fail Fast, Test Faster_
+#### _Fail Fast, Test Faster_
 
 <img alt="JET demo" src="assets/run.gif" width="600" />
 
