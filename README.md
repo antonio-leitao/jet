@@ -19,16 +19,15 @@ pip install jet
 
 ## Running Tests
 
-```sh
-jet run <option>
-```
+<img alt="JET demo" src="assets/run.gif" width="600" />
 
 JET searches for the `tests` folder in your working directory and runs all tests that start with `test_*` from the modules named as: `test_<something>.py`. JET starts by prompting you to choose wich modules to run. You can run all of them by selecting "Run All" or use the [`--all`](#run) flag, check the [`run`](#run) command for more options.
-<img alt="JET demo" src="assets/run.gif" width="600" />
 
 Specific options for the `run` command:
 
-<img alt="JET demo" src="assets/one_liner.gif" width="600" />
+```sh
+jet run <option>
+```
 
 - `--all`: Run all test modules. Skips initial module selection.
 - `--dir`: Path to tests directory. Defaults to /tests when not supplied.
@@ -37,14 +36,17 @@ Specific options for the `run` command:
 - `--n-jobs`: Number of processes to use in parallel when running tests. Defaults to one.
 - `--percentage`: Whether to show progress as a percentage instead of count.
 
+<img alt="JET demo" src="assets/one_liner.gif" width="600" />
+
 ## Reading Reports
+
+<img alt="JET demo" src="assets/see.gif" width="600" />
+
+All tests that did not conclude with a "pass" can be further inspected. To see a detailed report including, captured standard output, local variables, source code and error description run the `see` command. The report is colapsable as to display as much information as possible without cluttering your terminal.
 
 ```sh
 jet see <option>
 ```
-
-All tests that did not conclude with a "pass" can be further inspected. To see a detailed report including, captured standard output, local variables, source code and error description run the `see` command. The report is colapsable as to display as much information as possible without cluttering your terminal.
-<img alt="JET demo" src="assets/see.gif" width="600" />
 
 Specific options for the `see` command:
 
@@ -104,17 +106,17 @@ The custom error and description and variables will show up both on the run erbo
 
 # Further Customizations
 
+<img alt="JET demo" src="assets/colors.gif" width="600" />
+
 Global JET customization options:
 
 ```sh
 jet <option> <command>
 ```
 
-<img alt="JET demo" src="assets/colors.gif" width="600" />
-
 - `--foreground`: color (hex, rgb or terminal256) for foreground elements.
-- `--background`: color (hex, rgb or terminal256) for foreground elements.
-- `--pass-color`: color (hex, rgb or terminal256) for foreground elements.
-- `--failed-color`: color (hex, rgb or terminal256) for foreground elements.
-- `--error-color`: color (hex, rgb or terminal256) for foreground elements.
-- `--warning-color`: color (hex, rgb or terminal256) for foreground elements.
+- `--background`: color (hex, rgb or terminal256) for background.
+- `--pass-color`: color (hex, rgb or terminal256) for pass tests.
+- `--failed-color`: color (hex, rgb or terminal256) for failed tests.
+- `--error-color`: color (hex, rgb or terminal256) for tests that result in errors.
+- `--warning-color`: color (hex, rgb or terminal256) for tests that throw warnings.

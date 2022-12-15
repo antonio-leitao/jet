@@ -6,7 +6,7 @@ import warnings
 
 
 def test_addition():
-    """Array addiciton works as intended."""
+    """Array addition works as intended."""
     time.sleep(0.75)
     pass
 
