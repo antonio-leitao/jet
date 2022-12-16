@@ -1,6 +1,6 @@
-<h1 align="center">
+<p align="center">
   <img align="center" alt="JET demo" src="assets/banner.png"/>
-</h1>
+</p>
 
 <p align="center">
   <a href="#installation">Installation</a> • 
@@ -8,7 +8,7 @@
   <a href="#mastering-verbostity">Mastering Verbosity</a> •
   <a href="#custom-fail-conditions">Custom Fail Conditions</a> • 
   <a href="#further-customizations">Customization</a>
-  <p>Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
+  <p>JET is a testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, clutter the terminal or ugly to look at.</p>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 > **Note**
 > JET requires [`gum`](https://github.com/charmbracelet/gum) to be installed and available on your `PATH`.
 
-Use pip:
+Best way to install jet is through pip:
 
 ```sh
 pip install jet
@@ -68,10 +68,12 @@ All tests that did not conclude with a "pass" can be further inspected. To see a
 
 # Mastering Verbosity
 
-JET displays the result of each test after it has been run.
+### Test Routines
+
+JET displays the result of each test after it has been run, unless the `--quiet` flag is raised.
 
 - **if it passes** : It displays the tests's `doc`. If no `doc` is available, it shows the test's name.
-- **else** : Display's the error/warning/failing condition descritption. If no description is provided, it shows the `doc` or name of test. This behaviour is specially usefull of a test has more than one failing condition, for example:
+- **else** : Display's the error/warning/failing condition description. If no description is provided, it shows the `doc` or name of test. This behaviour is specially usefull of a test has more than one failing condition, for example:
 
 ```python
 #tests have to start with test_
@@ -86,6 +88,19 @@ def test_example():
 <p align="center">
 <img alt="JET demo" src="assets/verbosity.gif" width="600" />
 </p>
+
+### Test Modules
+
+JET searches for modules named: `test_<something>.py` in the `tests/` directory (for a different directory use [`--dir`](#running-tests)). When prompting the user JET will display "Seomthing" as the module title and the module `__doc__` as the description. The descripiton will be blank if JET otherwise. For creating a `__doc__` for a python module add:
+
+```python
+"""This is a module documentation.
+It should be the first line in any python module
+"""
+
+#defines all tests below
+def test_whatever():...
+```
 
 # Custom Fail Conditions
 
