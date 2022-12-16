@@ -3,11 +3,11 @@
 </h1>
 
 <p align="center">
-  [Installation](#installation) • 
-  [Basic Usage](#usage) • 
-  [Mastering Verbosity](#mastering-verbosity) • 
-  [Custom Fail Conditions](#custom-fail-conditions) • 
-  [Customization](#custom-fail-conditions)
+  <a href="#installation">Installation</a> • 
+  <a href="#usage">Basic Usage</a> •
+  <a href="#mastering-verbostity">Mastering Verbosity</a> •
+  <a href="#custom-fail-conditions">Custom Fail Conditions</a> • 
+  <a href="#further-customizations">Customization</a>
   <p>Fail Fast, test faster. Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
 </p>
 
