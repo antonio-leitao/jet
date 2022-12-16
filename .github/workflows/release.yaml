@@ -1,0 +1,25 @@
+on:
+  push:
+    refs-tags: '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    - name: Create changelog
+    run: |
+      CHANGELOG=$(echo "$COMMITS" | jq -r '.[] | "- " + .commit.message')
+      CHANGELOG="## Changelog\n${CHANGELOG}"
+    - name: Create changelog
+    run: |
+      CHANGELOG=$(echo "$COMMITS" | jq -r '.[] | "- " + .commit.message')
+      CHANGELOG="## Changelog\n${CHANGELOG}"
+    name: Create Release
+    
+    steps:
+    - uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        release_notes: ${{ env.CHANGELOG }}
+        draft: false
+        prerelease: false

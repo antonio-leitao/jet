@@ -26,17 +26,24 @@ add:
 	echo "installing $$PACKAGE"
 
 update:
-	@VERSION=$(shell grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3);\
-	IFS=. read major minor patch <<<"$$VERSION";\
-	echo "$$major.$$minor.$$patch";\
-	echo $$(( $(major) + 1 ))
-
 	@UPDATE=$$(gum choose "Major" "Minor" "Patch" --limit "1" --cursor.margin "0 1" --cursor.foreground "");\
-	echo "$$UPDATE"
-
-upgrade:
-	@NUM=$(2+1);\
-	NEW="0.0.$($(NUM)+1)";\
+	VERSION=$(shell grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3);\
+	IFS=. read major minor patch <<<"$$VERSION";\
+	if [ "$$UPDATE" = "Major" ]; then\
+        major=$$(( $$major + 1 ));\
+    fi;\
+	if [ "$$UPDATE" = "Minor" ]; then\
+        minor=$$(( $$minor + 1 ));\
+    fi;\
+	if [ "$$UPDATE" = "Patch" ]; then\
+        patch=$$(($$patch + 1));\
+    fi;\
+	NEW="$$major.$$minor.$$patch";\
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
 	
-	
+changelog:
+	@commit=$$(git log --oneline -1);\
+	sha=$$(echo "$$commit" | awk '{print $$1}');\
+	msg=$$(echo "$$commit" | sed 's/^[^ ]* //');\
+	echo "- $$sha: $${msg%$$'\n'*}" >> CHANGELOG.md;\
+	echo "$$msg" >> CHANGELOG.md
