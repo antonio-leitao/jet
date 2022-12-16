@@ -1,7 +1,17 @@
-# JET
-#### _Fail Fast, Test Faster_
+<h1 align="center">
+  <img align="center" alt="JET demo" src="assets/run.gif" width="600" />
+  <p>JET</p>
+</h1>
 
-<img alt="JET demo" src="assets/run.gif" width="600" />
+<p align="center">
+  <a href="https://docs.google.com/document/d/1LbYd3GpuVc3RHJjNKdX-tpS8K7UfwmgDJSfb_sWHdyc/edit">Perspective</a> •
+  <a href="https://www.dropbox.com/sh/6qqok1j6ma9jl2w/AABv0H6nryZOvHbFt0CVCySya?dl=0">Dropbox</a> •
+  <a href="https://docs.google.com/document/d/13n4-3t70HZsvDpl_a2F-aijfi6leenky4wJN7Z8dJkM/edit">Monthly Agenda</a> •
+  <a href="https://github.com/Antonio-Leitao/CETI/tree/main/Literature">Literature</a> •
+  <a href="https://github.com/Antonio-Leitao/CETI/tree/main/Code&Data">Code & Data</a> •
+  <a href="https://github.com/earthspecies/library">Other Animals</a>
+  <p>Fail Fast, test faster. Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
+</p>
 
 ## Installation
 
@@ -18,12 +28,6 @@ pip install jet
 
 ## Running Tests
 
-<img alt="JET demo" src="assets/run.gif" width="600" />
-
-JET searches for the `tests` folder in your working directory and runs all tests that start with `test_*` from the modules named as: `test_<something>.py`. JET starts by prompting you to choose wich modules to run. You can run all of them by selecting "Run All" or use the [`--all`](#run) flag, check the [`run`](#run) command for more options.
-
-Specific options for the `run` command:
-
 ```sh
 jet run <option>
 ```
@@ -35,13 +39,13 @@ jet run <option>
 - `--n-jobs`: Number of processes to use in parallel when running tests. Defaults to one.
 - `--percentage`: Whether to show progress as a percentage instead of count.
 
+<img align="center" alt="JET demo" src="assets/run.gif" width="600" />
+
+JET searches for the `tests` folder in your working directory and runs all tests that start with `test_*` from the modules named as: `test_<something>.py`. JET starts by prompting you to choose wich modules to run. You can run all of them by selecting "Run All" or use the [`--all`](#run) flag, check the [`run`](#run) command for more options.
+
 <img alt="JET demo" src="assets/one_liner.gif" width="600" />
 
 ## Reading Reports
-
-<img alt="JET demo" src="assets/see.gif" width="600" />
-
-All tests that did not conclude with a "pass" can be further inspected. To see a detailed report including, captured standard output, local variables, source code and error description run the `see` command. The report is colapsable as to display as much information as possible without cluttering your terminal.
 
 ```sh
 jet see <option>
@@ -53,6 +57,10 @@ Specific options for the `see` command:
 - `--doc-width`: Width (number of columns collumns) of report doc.
 - `--text-width`: Width (number of columns collumns) of text blocks in report.
 - `--buffer`: Number of lines of code to show in the report.
+
+<img alt="JET demo" src="assets/see.gif" width="600" />
+
+All tests that did not conclude with a "pass" can be further inspected. To see a detailed report including, captured standard output, local variables, source code and error description run the `see` command. The report is colapsable as to display as much information as possible without cluttering your terminal.
 
 # Mastering Verbosity
 
@@ -105,8 +113,6 @@ The custom error and description and variables will show up both on the run erbo
 
 # Further Customizations
 
-<img alt="JET demo" src="assets/colors.gif" width="600" />
-
 Global JET customization options:
 
 ```sh
@@ -119,3 +125,5 @@ jet <option> <command>
 - `--failed-color`: color (hex, rgb or terminal256) for failed tests.
 - `--error-color`: color (hex, rgb or terminal256) for tests that result in errors.
 - `--warning-color`: color (hex, rgb or terminal256) for tests that throw warnings.
+
+<img alt="JET demo" src="assets/colors.gif" width="600" />
