@@ -3,17 +3,16 @@
 </h1>
 
 <p align="center">
-  <a href="https://docs.google.com/document/d/1LbYd3GpuVc3RHJjNKdX-tpS8K7UfwmgDJSfb_sWHdyc/edit">Perspective</a> •
-  <a href="https://www.dropbox.com/sh/6qqok1j6ma9jl2w/AABv0H6nryZOvHbFt0CVCySya?dl=0">Dropbox</a> •
-  <a href="https://docs.google.com/document/d/13n4-3t70HZsvDpl_a2F-aijfi6leenky4wJN7Z8dJkM/edit">Monthly Agenda</a> •
-  <a href="https://github.com/Antonio-Leitao/CETI/tree/main/Literature">Literature</a> •
-  <a href="https://github.com/Antonio-Leitao/CETI/tree/main/Code&Data">Code & Data</a> •
-  <a href="https://github.com/earthspecies/library">Other Animals</a>
+  [Installation](#installation) • 
+  [Basic Usage](#usage) • 
+  [Mastering Verbosity](#mastering-verbosity) • 
+  [Custom Fail Conditions](#custom-fail-conditions) • 
+  [Customization](#custom-fail-conditions)
   <p>Fail Fast, test faster. Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
 </p>
 
 <p align="center">
-  <img alt="JET demo" src="assets/run.gif" width="600" /><img src="Images/vlmc/vlmc_logo.png" width="500"/>
+  <img alt="JET demo" src="assets/run.gif" width="600" />
 </p>
 
 ## Installation
