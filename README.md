@@ -8,11 +8,11 @@
   <a href="#mastering-verbostity">Mastering Verbosity</a> •
   <a href="#custom-fail-conditions">Custom Fail Conditions</a> • 
   <a href="#further-customizations">Customization</a>
-  <p>Fail Fast, test faster. Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
+  <p>Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
 </p>
 
 <p align="center">
-  <img alt="JET demo" src="assets/run.gif" width="600" />
+  <img alt="JET demo" src="assets/one_liner.gif" width="800" />
 </p>
 
 ## Installation
@@ -28,7 +28,7 @@ pip install jet
 
 # Usage
 
-## Running Tests
+### Running Tests
 
 ```sh
 jet run <option>
@@ -47,11 +47,7 @@ jet run <option>
 
 JET searches for the `tests` folder in your working directory and runs all tests that start with `test_*` from the modules named as: `test_<something>.py`. JET starts by prompting you to choose wich modules to run. You can run all of them by selecting "Run All" or use the [`--all`](#run) flag, check the [`run`](#run) command for more options.
 
-<p align="center">
-<img alt="JET demo" src="assets/one_liner.gif" width="600" />
-</p>
-
-## Reading Reports
+### Reading Reports
 
 ```sh
 jet see <option>
