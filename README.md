@@ -1,6 +1,5 @@
 <h1 align="center">
-  <img align="center" alt="JET demo" src="assets/run.gif" width="600" />
-  <p>JET</p>
+  <img align="center" alt="JET demo" src="assets/banner.png" width="1000" />
 </h1>
 
 <p align="center">
@@ -12,6 +11,8 @@
   <a href="https://github.com/earthspecies/library">Other Animals</a>
   <p>Fail Fast, test faster. Jet is testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, hard to understand and ugly to look at.</p>
 </p>
+
+<img align="center" alt="JET demo" src="assets/run.gif" width="600" />
 
 ## Installation
 
