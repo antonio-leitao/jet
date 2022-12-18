@@ -31,10 +31,8 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-    - name: Generate changelog
     - uses: actions/checkout@v2
-
-    - name: Get changes
+    - name: Generate changelog
       run: make changelog
     - name: Create release
       uses: actions/create-release@v1
@@ -42,3 +40,4 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         body: ${{ env.CHANGELOG }}
+
