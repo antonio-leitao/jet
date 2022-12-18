@@ -42,8 +42,8 @@ update:
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
 	
 changelog:
-	@commit=$$(git log --oneline -1);\
+	@msg=$$(gum write --width 60 --height 6 --base.margin "1 1" --cursor.foreground 31 --placeholder "Details of this change (CTRL+D to finish)");\
+	commit=$$(git log --oneline -1);\
 	sha=$$(echo "$$commit" | awk '{print $$1}');\
-	msg=$$(echo "$$commit" | sed 's/^[^ ]* //');\
 	echo "- $$sha: $${msg%$$'\n'*}" >> CHANGELOG.md;\
 	echo "$$msg" >> CHANGELOG.md
