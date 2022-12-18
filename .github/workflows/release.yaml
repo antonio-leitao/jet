@@ -1,25 +1,27 @@
 on:
   push:
-    refs-tags: '*'
+    tags:
+      - "*"
 
+# A job to create a release
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    - name: Create changelog
-    run: |
-      CHANGELOG=$(echo "$COMMITS" | jq -r '.[] | "- " + .commit.message')
-      CHANGELOG="## Changelog\n${CHANGELOG}"
-    - name: Create changelog
-    run: |
-      CHANGELOG=$(echo "$COMMITS" | jq -r '.[] | "- " + .commit.message')
-      CHANGELOG="## Changelog\n${CHANGELOG}"
+  create_release:
     name: Create Release
-    
     steps:
-    - uses: actions/create-release@v1
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        release_notes: ${{ env.CHANGELOG }}
-        draft: false
-        prerelease: false
+      # Build and deploy the code
+      - run: |
+          # Build command goes here
+          echo "Building code..."
+      - run: |
+          # Deployment command goes here
+          echo "Deploying code..."
+
+      # Use the create-release action to create a release
+      - uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            This is the description for the release.
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}

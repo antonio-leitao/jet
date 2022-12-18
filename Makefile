@@ -41,9 +41,29 @@ update:
 	NEW="$$major.$$minor.$$patch";\
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
 	
+
 changelog:
-	@msg=$$(gum write --width 60 --height 6 --base.margin "1 1" --cursor.foreground 31 --placeholder "Details of this change (CTRL+D to finish)");\
-	commit=$$(git log --oneline -1);\
-	sha=$$(echo "$$commit" | awk '{print $$1}');\
-	echo "- $$sha: $${msg%$$'\n'*}" >> CHANGELOG.md;\
-	echo "$$msg" >> CHANGELOG.md
+	TAG=`git describe --abbrev=0 --tags 2>/dev/null || ''`; \
+	if [ -z "$$TAG" ]; then \
+		TAG=`git rev-list --max-parents=0 HEAD`; \
+	fi; \
+	COMMITS=`git log --oneline $$TAG..HEAD`; \
+	if [ -z "$$COMMITS" ]; then \
+		echo "No new commits since the last tag."; \
+		exit 0; \
+	fi; \
+	echo "# Changelog" > CHANGELOG.md; \
+	echo "" >> CHANGELOG.md; \
+	echo "## Changes since $$TAG" >> CHANGELOG.md; \
+	echo "" >> CHANGELOG.md; \
+	while read -r COMMIT; do \
+		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
+		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
+		echo "* $$SHA: $$DESCRIPTION" >> CHANGELOG.md; \
+	done <<< "$$COMMITS"
+
+
+	
+
+
+
