@@ -42,7 +42,7 @@ update:
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
 	
 
-changelog:
+changelog-file:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [ -z "$$TAG" ]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
@@ -68,4 +68,20 @@ untag:
 	gum confirm --selected.background 31 "Are you sure?" && git tag -d $$TAG && git push --delete origin $$TAG
 
 
-
+change:
+	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
+	if [ -z "$$TAG" ]; then \
+		TAG=`git rev-list --max-parents=0 HEAD`; \
+	fi; \
+	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
+	if [ -z "$$COMMITS" ]; then \
+		echo "No new commits since the last tag."; \
+		exit 0; \
+	fi; \
+	CHANGELOG="## Changelog\n\n"; \
+	while read -r COMMIT; do \
+		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
+		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
+		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
+	done <<< "$$COMMITS";\
+	echo $$CHANGELOG

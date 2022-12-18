@@ -1,3 +1,26 @@
+# name: Create Release
+
+# on:
+#   push:
+#     tags:
+#       - "*"
+
+# jobs:
+#   create_release:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Create Release
+#       uses: actions/create-release@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         tag_name: ${{ github.ref }}
+#         release_name: Release ${{ github.ref }}
+#         draft: false
+#         prerelease: false
+
+
 name: Create Release
 
 on:
@@ -6,17 +29,36 @@ on:
       - "*"
 
 jobs:
-  create_release:
+  create-release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Create Release
+    - name: Get previous tag
+      run: |
+        TAG=`git describe --abbrev=0 --tags 2>/dev/null`
+        if [ -z "$TAG" ]; then
+          TAG=`git rev-list --max-parents=0 HEAD`
+        fi
+    - name: Get commits between tags
+      run: |
+        COMMITS=`git log --oneline $TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`
+        if [ -z "$COMMITS" ]; then 
+          echo "No new commits since the last tag."
+          exit 0
+        fi
+        CHANGELOG="## Changelog\n\n"
+        while read -r COMMIT; do
+          SHA=`echo $COMMIT | awk '{print $1}'`
+          DESCRIPTION=`echo $COMMIT | sed 's/^[^ ]* //'`
+          CHANGELOG="$CHANGELOG* $SHA: $DESCRIPTION\n"
+        done <<< "$COMMITS"
+    - name: Create release
       uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        body: |
+          $CHANGELOG
 
+	
+	
