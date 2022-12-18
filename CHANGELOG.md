@@ -2,7 +2,7 @@
 
 ## Changes since 887cdbcbb91cbb23ad7c84b2e4da8ac825d4171f
 
-* 3ab7da2: Typos
+* 9ecbdc9: Pre-release
 * c4c17f5: Added changelog recipe to makefile.
 * 0c1a37b: Changes to readme
 * af1da97: Final tweaks to readme
@@ -11,7 +11,6 @@
 * bde7815: Centered some divs in readme
 * ed81a8a: added banner to readme
 * 275205d: Changes to Readme
-* 3bb570e: Typos
 * c14612e: Changes to readme
 * 8db9168: Updated readme and started the vhs gifs.
 * 5c5758b: Fixed issue with progress bar.

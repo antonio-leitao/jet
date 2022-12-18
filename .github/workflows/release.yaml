@@ -8,14 +8,6 @@ jobs:
   create_release:
     name: Create Release
     steps:
-      # Build and deploy the code
-      - run: |
-          # Build command goes here
-          echo "Building code..."
-      - run: |
-          # Deployment command goes here
-          echo "Deploying code..."
-
       # Use the create-release action to create a release
       - uses: actions/create-release@v1
         with:

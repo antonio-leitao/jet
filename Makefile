@@ -43,11 +43,11 @@ update:
 	
 
 changelog:
-	TAG=`git describe --abbrev=0 --tags 2>/dev/null || ''`; \
+	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [ -z "$$TAG" ]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
 	fi; \
-	COMMITS=`git log --oneline $$TAG..HEAD`; \
+	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
 	if [ -z "$$COMMITS" ]; then \
 		echo "No new commits since the last tag."; \
 		exit 0; \
@@ -63,7 +63,9 @@ changelog:
 	done <<< "$$COMMITS"
 
 
-	
+untag:
+	@TAG=$$(gum input --placeholder "version to drop");\
+	gum confirm --selected.background 31 "Are you sure?" && git tag -d $$TAG && git push --delete origin $$TAG
 
 
 
