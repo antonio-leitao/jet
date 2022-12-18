@@ -68,7 +68,7 @@ untag:
 	gum confirm --selected.background 31 "Are you sure?" && git tag -d $$TAG && git push --delete origin $$TAG
 
 
-change:
+changelog:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [ -z "$$TAG" ]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
@@ -84,4 +84,3 @@ change:
 		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
 		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
 	done <<< "$$COMMITS";\
-	echo $$CHANGELOG
