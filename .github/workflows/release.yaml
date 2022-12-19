@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Point to bash
-    - run: ln -sf bash /bin/sh
+      run: ln -sf bash /bin/sh
     - name: Generate changelog
       run: make changelog
     - name: Create release
