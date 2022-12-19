@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 help:
 	@echo "\nAvailable commnads:"
@@ -63,9 +64,13 @@ changelog-file:
 	done <<< "$$COMMITS"
 
 
-untag:
+retag:
 	@TAG=$$(gum input --placeholder "version to drop");\
-	gum confirm --selected.background 31 "Are you sure?" && git tag -d $$TAG && git push --delete origin $$TAG
+	gum confirm --selected.background 31 "Are you sure?" && git tag -d $$TAG && git push --delete origin $$TAG;\
+	git add -A;\
+	git commit -m "Bugfix";\
+	git tag -a $$TAG -m "Pre-Release";\
+	git push origin master --tags
 
 
 changelog:

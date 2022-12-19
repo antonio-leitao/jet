@@ -33,9 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Generate changelog
-      run:
-        shell: /usr/bin/bash
-        command: make changelog
+      run: make changelog
     - name: Create release
       uses: actions/create-release@v1
       with:
