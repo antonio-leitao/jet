@@ -23,4 +23,4 @@ dependencies = [
 jet = "jet_test.main:main"
 
 [tool.setuptools]
-packages = ["jet"]
+packages = ["jet_test"]
