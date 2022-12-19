@@ -72,3 +72,7 @@ retag:
 	git tag -a $$TAG -m "Pre-Release";\
 	git push origin master --tags
 
+trial:
+	changelog=$(cat CHANGELOG.md);\
+	echo "$$changelog"
+

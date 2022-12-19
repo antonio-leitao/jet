@@ -14,10 +14,7 @@ jobs:
 
       - name: Read CHANGELOG.md file
         id: read_changelog
-        run: |
-          changelog=$(cat CHANGELOG.md)
-          echo "::set-output name=changelog::$changelog"
-
+        run: LOG=$(cat CHANGELOG.md)
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -28,4 +25,4 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-          body: ${{ steps.read_changelog.outputs.changelog }}
+          body: ${{ env.LOG }}
