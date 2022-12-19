@@ -59,11 +59,12 @@ release:
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml;\
 	python -m build;\
 	$(MAKE) changelog;\
+	rm CHANGELOG.md;\
 	git add -A;\
 	DESCRIPTION=$$(gum write --width 60 --height 6 --base.margin "1 1" --cursor.foreground 31 --placeholder "Details of this change (CTRL+D to finish)");\
 	gum confirm --selected.background 31 "Commit changes?" && git commit -m "$$DESCRIPTION";\
 	git tag -a $$NEW -m "Release";\
-	git push origin master;\
+	git push origin master --tags;\
 	gh release create $$NEW -F CHANGELOG.md
 
 retag:
