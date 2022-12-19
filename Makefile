@@ -7,7 +7,7 @@ help:
 
 init: 
 	@pip install pip-chill 
-	
+
 clean:
 	@find . -name \*.pyc -delete
 	@find . -type d -name "__pycache__" -delete
@@ -56,9 +56,6 @@ release:
 	NEW="$$major.$$minor.$$patch";\
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml;\
 	python -m build;\
-	git add -A;\
-	DESCRIPTION=$$(gum write --width 60 --height 6 --base.margin "1 1" --cursor.foreground 31 --placeholder "Details of this change (CTRL+D to finish)");\
-	gum confirm --selected.background 31 "Commit changes?" && git commit -m "$$DESCRIPTION";\
 	git tag -a $$NEW -m "Release";\
 	git push origin master --tags;\
 	$(MAKE) changelog;\
