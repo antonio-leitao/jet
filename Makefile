@@ -6,7 +6,8 @@ help:
 	@echo ">> add : adds dependency to project with pip" | sed 's/^/   /'
 
 init: 
-	@pip install pip-chill 
+	@pip install pip-chill
+	@pip install --upgrade twine
 
 clean:
 	@find . -name \*.pyc -delete
@@ -55,6 +56,8 @@ release:
     fi;\
 	NEW="$$major.$$minor.$$patch";\
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml;\
+	git add pyproject.toml;\
+	git commit -m "Updated version";\
 	python -m build;\
 	$(MAKE) changelog;\
 	git tag -a $$NEW -m "Release";\
