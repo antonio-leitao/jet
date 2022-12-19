@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 help:
 	@echo "\nAvailable commnads:"
 	@echo ">> clean : removes all pycaches" | sed 's/^/   /'
