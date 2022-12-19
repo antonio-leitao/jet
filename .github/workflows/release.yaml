@@ -13,7 +13,7 @@ jobs:
           ref: ${{ github.ref }}
       - name: Get previous tag
         run: |
-          PREVIOUS_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          PREVIOUS_TAG=`git describe --abbrev=0 --tags 2>/dev/null`;
           echo "Previous tag: $PREVIOUS_TAG"
       - name: Get commits since previous tag
         run: |
