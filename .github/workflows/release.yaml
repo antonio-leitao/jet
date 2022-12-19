@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set bash
-      run: ln -sf bash /bin/sh
+    - name: Set permissions
+      run: chmod -R 755 .
     - name: Generate changelog
       run: make changelog
     - name: Create release
