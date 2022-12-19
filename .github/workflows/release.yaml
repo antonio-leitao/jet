@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Add changes to release
-        run: CHANGELOG=$(cat CHANGELOG.md)
+      run: CHANGELOG=$(cat CHANGELOG.md)
     - name: Create release
       uses: actions/create-release@v1
       env:
