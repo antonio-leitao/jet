@@ -22,7 +22,7 @@ jobs:
           echo "tag: $TAG"
       - name: Get commits since previous tag
         run: |
-          COMMITS=$(git log --oneline $PREVIOUS_TAG..$HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix")
+          COMMITS=$(git log --oneline $PREVIOUS_TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix")
           echo "Commits since previous tag:"
           echo "$COMMITS"
           CHANGELOG="THIS IS A TEST"
