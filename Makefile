@@ -73,11 +73,11 @@ retag:
 
 changelog:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
-	if [ -z "$$TAG" ]; then \
+	if [[ -z "$$TAG" ]]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
 	fi; \
 	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
-	if [ -z "$$COMMITS" ]; then \
+	if [[ -z "$$COMMITS" ]]; then \
 		echo "No new commits since the last tag."; \
 		exit 0; \
 	fi; \
