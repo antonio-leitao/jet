@@ -16,13 +16,13 @@ jobs:
           TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
           PREVIOUS_TAG=$(git describe --tags `git rev-list --tags --max-count=2` | tail -n 1 || echo '')
           if [ "$TAG" = "$PREVIOUS_TAG" ]; then
-              PREVIOUS_TAG=`git rev-list --max-parents=0 HEAD`
+              PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
           fi
           echo "Previous tag: $PREVIOUS_TAG"
           echo "tag: $TAG"
       - name: Get commits since previous tag
         run: |
-          COMMITS=`git log --oneline $PREVIOUS_TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`
+          COMMITS=$(git log --oneline $PREVIOUS_TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix")
           echo "Commits since previous tag:"
           echo "$COMMITS"
           CHANGELOG=$(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
