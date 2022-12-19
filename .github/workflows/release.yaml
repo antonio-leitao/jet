@@ -33,9 +33,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Generate changelog
-      run: |
+      run:
         shell: /usr/bin/bash
-        make changelog
+        command: make changelog
     - name: Create release
       uses: actions/create-release@v1
       with:
