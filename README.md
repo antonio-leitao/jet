@@ -23,7 +23,7 @@
 Best way to install jet is through pip:
 
 ```sh
-pip install jet
+pip install jet-test
 ```
 
 # Usage

@@ -63,6 +63,7 @@ release:
 	git tag -a $$NEW -m "Release";\
 	git push origin master --tags;\
 	gh release create $$NEW -F CHANGELOG.md;\
+	twine upload dist/*;\
 	rm CHANGELOG.md
 
 retag:
