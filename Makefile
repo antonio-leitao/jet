@@ -86,4 +86,4 @@ changelog:
 		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
 		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
 		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
-	done <<< "$$COMMITS";\
+	done <<- "$$COMMITS"
