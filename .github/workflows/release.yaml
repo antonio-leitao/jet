@@ -15,6 +15,9 @@ jobs:
         run: |
           TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
           PREVIOUS_TAG=$(git describe --tags `git rev-list --tags --max-count=2` | tail -n 1 || echo '')
+          if [ "$LAST_TAG" = "$SECOND_TO_LAST_TAG" ]; then
+              SECOND_TO_LAST_TAG=''
+          fi
           echo "Previous tag: $PREVIOUS_TAG"
           echo "tag: $TAG"
       - name: Get commits since previous tag
@@ -26,7 +29,8 @@ jobs:
           fi
           echo "Commits since previous tag:"
           echo "$COMMITS"
-          CHANGLOG=$(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
+          CHANGELOG=$(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
+          echo "$CHANGELOG"
       - name: Create release
         uses: actions/create-release@v1
         env:
