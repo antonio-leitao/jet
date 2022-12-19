@@ -30,9 +30,12 @@ update:
 	IFS=. read major minor patch <<<"$$VERSION";\
 	if [ "$$UPDATE" = "Major" ]; then\
         major=$$(( $$major + 1 ));\
+		minor=0;\
+		patch=0;\
     fi;\
 	if [ "$$UPDATE" = "Minor" ]; then\
         minor=$$(( $$minor + 1 ));\
+		patch=0;\
     fi;\
 	if [ "$$UPDATE" = "Patch" ]; then\
         patch=$$(($$patch + 1));\
@@ -68,3 +71,4 @@ retag:
 	git commit -m "Bugfix";\
 	git tag -a $$TAG -m "Pre-Release";\
 	git push origin master --tags
+
