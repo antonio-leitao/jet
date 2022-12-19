@@ -14,10 +14,7 @@ jobs:
       - name: Get previous tag
         run: |
           TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          PREVIOUS_TAG=$(git describe --tags `git rev-list --tags --max-count=2` | tail -n 1 || echo '')
-          if [ "$TAG" = "$PREVIOUS_TAG" ]; then
-              PREVIOUS_TAG=$(git rev-list --max-parents=0 --reverse HEAD | head -n 1)
-          fi
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 --reverse HEAD | head -n 1)
           echo "Previous tag: $PREVIOUS_TAG"
           echo "tag: $TAG"
       - name: Get commits since previous tag
