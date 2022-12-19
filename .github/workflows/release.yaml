@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set permissions
-      run: chmod -R 755 .
     - name: Generate changelog
-      run: make changelog
+      run: |
+        shell: /usr/bin/bash
+        make changelog
     - name: Create release
       uses: actions/create-release@v1
       with:
