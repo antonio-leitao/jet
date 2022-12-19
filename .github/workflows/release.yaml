@@ -32,6 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set bash
+      run: ln -sf bash /bin/sh
     - name: Generate changelog
       run: make changelog
     - name: Create release
