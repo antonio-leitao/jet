@@ -1,26 +1,35 @@
-name: Create Release
+name: Release Notes
 
 on:
   push:
-    tags:
-      - "*"
+    tags: '*'
 
 jobs:
-  create-release:
+  release_notes:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     steps:
-    - uses: actions/checkout@v3
-    - name: Add changes to release
-      run: CHANGELOG=$(cat CHANGELOG.md)
-    - name: Create release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ${{ env.CHANGELOG }}
-
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: Get previous tag
+        run: |
+          PREVIOUS_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Previous tag: $PREVIOUS_TAG"
+      - name: Get commits since previous tag
+        run: |
+          if [ -z "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log --oneline)
+          else
+            COMMITS=$(git log --oneline $PREVIOUS_TAG..HEAD)
+          fi
+          echo "Commits since previous tag:"
+          echo "$COMMITS"
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            $(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
