@@ -1,34 +1,31 @@
-name: Release Notes
+name: Create release 
 
 on:
   push:
-    tags: '*'
+    tags:
+      - '*'
 
 jobs:
-  release_notes:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-      - name: Get previous tag
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Read CHANGELOG.md file
+        id: read_changelog
         run: |
-          TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          PREVIOUS_TAG=$(git rev-list --max-parents=0 --reverse HEAD | head -n 1)
-          echo "Previous tag: $PREVIOUS_TAG"
-          echo "tag: $TAG"
-      - name: Get commits since previous tag
-        run: |
-          COMMITS=$(git log --oneline | grep -v -e "Typo" -e "Typos" -e "Bugfix")
-          echo "Commits since previous tag:"
-          echo "$COMMITS"
-          CHANGELOG="THIS IS A TEST"
-          echo "$CHANGELOG"
+          changelog=$(cat CHANGELOG.md)
+          echo "::set-output name=changelog::$changelog"
+
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: ${{env.CHANGELOG}}
+          draft: false
+          prerelease: false
+          body: ${{ steps.read_changelog.outputs.changelog }}
