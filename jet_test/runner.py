@@ -15,9 +15,9 @@ from typing import Any
 from dataclasses import asdict
 
 # self imports
-import jet.ui as ui
-import jet.checks as jetcheck
-from jet.classes import RunConfig, Module, Test, Error
+import jet_test.ui as ui
+import jet_test.checks as jetcheck
+from jet_test.classes import RunConfig, Module, Test, Error
 
 # dependencies
 from rich.text import Text

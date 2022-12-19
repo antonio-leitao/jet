@@ -11,9 +11,9 @@ from dataclasses import asdict
 import importlib.metadata
 
 # self
-from jet.runner import Run
-from jet.seer import See
-from jet.classes import JetConfig, RunConfig, SeeConfig
+from jet_test.runner import Run
+from jet_test.seer import See
+from jet_test.classes import JetConfig, RunConfig, SeeConfig
 
 # dependencies
 from rich.console import Console

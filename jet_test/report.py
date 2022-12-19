@@ -4,7 +4,7 @@ import re
 import textwrap
 
 # self
-from jet.classes import Error
+from jet_test.classes import Error
 
 # dependencies
 from rich.panel import Panel

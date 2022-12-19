@@ -1,9 +1,9 @@
 help:
 	@echo "\nAvailable commnads:"
+	@echo ">> init : Initiates python environment" | sed 's/^/   /'
 	@echo ">> clean : removes all pycaches" | sed 's/^/   /'
 	@echo ">> commit : commits all changes to git" | sed 's/^/   /'
-	@echo ">> release : builds and releases package to Pypy" | sed 's/^/   /'
-	@echo ">> add : adds dependency to project with pip" | sed 's/^/   /'
+	@echo ">> release : Updates version, builds and releases package to Pypy" | sed 's/^/   /'
 
 init: 
 	@pip install pip-chill
@@ -62,7 +62,7 @@ release:
 	$(MAKE) changelog;\
 	git tag -a $$NEW -m "Release";\
 	git push origin master --tags;\
-	gh release create $$NEW -F CHANGELOG.md;\
+	gh release create $$NEW -F CHANGELOG.md --title "Jet v$$NEW";\
 	twine upload dist/*;\
 	rm CHANGELOG.md
 
