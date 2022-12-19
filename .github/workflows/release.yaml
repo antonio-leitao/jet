@@ -32,10 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Point to bash
-      run: ln -sf bash /bin/sh
     - name: Generate changelog
       run: make changelog
+      shell: bash
     - name: Create release
       uses: actions/create-release@v1
       env:
