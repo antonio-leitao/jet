@@ -1,25 +1,3 @@
-# name: Create Release
-
-# on:
-#   push:
-#     tags:
-#       - "*"
-
-# jobs:
-#   create_release:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v2
-#     - name: Create Release
-#       uses: actions/create-release@v1
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#       with:
-#         tag_name: ${{ github.ref }}
-#         release_name: Release ${{ github.ref }}
-#         draft: false
-#         prerelease: false
-
 name: Create Release
 
 on:
@@ -35,8 +13,8 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
-    - name: Generate changelog
-      run: make changelog
+    - name: Add changes to release
+        run: CHANGELOG=$(cat CHANGELOG.md)
     - name: Create release
       uses: actions/create-release@v1
       env:

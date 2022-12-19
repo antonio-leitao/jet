@@ -41,7 +41,7 @@ update:
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
 	
 
-changelog-file:
+changelog:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [ -z "$$TAG" ]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
@@ -51,8 +51,6 @@ changelog-file:
 		echo "No new commits since the last tag."; \
 		exit 0; \
 	fi; \
-	echo "# Changelog" > CHANGELOG.md; \
-	echo "" >> CHANGELOG.md; \
 	echo "## Changes since $$TAG" >> CHANGELOG.md; \
 	echo "" >> CHANGELOG.md; \
 	while read -r COMMIT; do \
@@ -69,44 +67,5 @@ retag:
 	git commit -m "Bugfix";\
 	git tag -a $$TAG -m "Pre-Release";\
 	git push origin master --tags
-
-
-changes:
-	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
-	if [ -z "$$TAG" ]; then \
-		TAG=`git rev-list --max-parents=0 HEAD`; \
-	fi; \
-	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
-	if [ -z "$$COMMITS" ]; then \
-		echo "No new commits since the last tag."; \
-		exit 0; \
-	fi; \
-	CHANGELOG="## Changelog\n\n"; \
-	while read -r COMMIT; do \
-		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
-		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
-		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
-	done <<< "$$COMMITS"
-
-changelog:
-	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
-	if [ -z "$$TAG" ]; then \
-		TAG=`git rev-list --max-parents=0 HEAD`; \
-	fi; \
-	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
-	if [ -z "$$COMMITS" ]; then \
-		echo "No new commits since the last tag."; \
-		exit 0; \
-	fi; \
-	CHANGELOG="## Changelog\n\n"; \
-	echo "$$COMMITS" > commits.tmp; \
-	while read -r COMMIT; do \
-		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
-		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
-		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
-	done < commits.tmp; \
-	rm commits.tmp; \
-
-
 
 
