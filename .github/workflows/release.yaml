@@ -30,11 +30,8 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: zsh
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Generate changelog
       run: make changelog
     - name: Create release
@@ -43,4 +40,3 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         body: ${{ env.CHANGELOG }}
-
