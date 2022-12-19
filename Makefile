@@ -17,35 +17,11 @@ commit:
 	gum confirm --selected.background 31 "Commit changes?" && git commit -m "$$DESCRIPTION"
 	@git push origin master
 
-release:
-	@python -m build
-
 add:
 	@PACKAGE=$$(gum input --placeholder "Type package name");\
 	echo "installing $$PACKAGE"
 
-update:
-	@UPDATE=$$(gum choose "Major" "Minor" "Patch" --limit "1" --cursor.margin "0 1" --cursor.foreground "");\
-	VERSION=$(shell grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3);\
-	IFS=. read major minor patch <<<"$$VERSION";\
-	if [ "$$UPDATE" = "Major" ]; then\
-        major=$$(( $$major + 1 ));\
-		minor=0;\
-		patch=0;\
-    fi;\
-	if [ "$$UPDATE" = "Minor" ]; then\
-        minor=$$(( $$minor + 1 ));\
-		patch=0;\
-    fi;\
-	if [ "$$UPDATE" = "Patch" ]; then\
-        patch=$$(($$patch + 1));\
-    fi;\
-	NEW="$$major.$$minor.$$patch";\
-	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml
-	
-
 changelog:
-
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [ -z "$$TAG" ]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
@@ -63,6 +39,32 @@ changelog:
 		echo "* $$SHA: $$DESCRIPTION" >> CHANGELOG.md; \
 	done <<< "$$COMMITS"
 
+release:
+	@UPDATE=$$(gum choose "Major" "Minor" "Patch" --limit "1" --cursor.margin "0 1" --cursor.foreground "");\
+	VERSION=$(shell grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3);\
+	IFS=. read major minor patch <<<"$$VERSION";\
+	if [ "$$UPDATE" = "Major" ]; then\
+        major=$$(( $$major + 1 ));\
+		minor=0;\
+		patch=0;\
+    fi;\
+	if [ "$$UPDATE" = "Minor" ]; then\
+        minor=$$(( $$minor + 1 ));\
+		patch=0;\
+    fi;\
+	if [ "$$UPDATE" = "Patch" ]; then\
+        patch=$$(($$patch + 1));\
+    fi;\
+	NEW="$$major.$$minor.$$patch";\
+	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml;\
+	python -m build;\
+	$(MAKE) changelog;\
+	git add -A;\
+	DESCRIPTION=$$(gum write --width 60 --height 6 --base.margin "1 1" --cursor.foreground 31 --placeholder "Details of this change (CTRL+D to finish)");\
+	gum confirm --selected.background 31 "Commit changes?" && git commit -m "$$DESCRIPTION";\
+	git tag -a $$NEW -m "Release";\
+	git push origin master;\
+	gh release create $$NEW -F CHANGELOG.md
 
 retag:
 	@TAG=$$(gum input --placeholder "version to drop");\
@@ -71,8 +73,4 @@ retag:
 	git commit -m "Bugfix";\
 	git tag -a $$TAG -m "Pre-Release";\
 	git push origin master --tags
-
-tag:
-	
-
 
