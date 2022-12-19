@@ -13,17 +13,20 @@ jobs:
           ref: ${{ github.ref }}
       - name: Get previous tag
         run: |
-          PREVIOUS_TAG=`git describe --abbrev=0 --tags 2>/dev/null`;
+          TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          PREVIOUS_TAG=$(git describe --tags `git rev-list --tags --max-count=2` | tail -n 1 || echo '')
           echo "Previous tag: $PREVIOUS_TAG"
+          echo "tag: $TAG"
       - name: Get commits since previous tag
         run: |
           if [ -z "$PREVIOUS_TAG" ]; then
-            COMMITS=$(git log --oneline)
+            COMMITS=$(git log --oneline --no-merges)
           else
-            COMMITS=$(git log --oneline $PREVIOUS_TAG..HEAD)
+            COMMITS=$(git log --oneline $PREVIOUS_TAG..$TAG --no-merges)
           fi
           echo "Commits since previous tag:"
           echo "$COMMITS"
+          CHANGLOG=$(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
       - name: Create release
         uses: actions/create-release@v1
         env:
@@ -31,5 +34,4 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: |
-            $(echo "$COMMITS" | sed -e 's/^\([^ ]*\) \(.*\)$/\1: \2/g')
+          body: ${{env.CHANGELOG}}
