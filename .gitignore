@@ -1,5 +1,6 @@
 # Files
 .DS_Store
+CHANGELOG.md
 
 # Binaries
 dist
