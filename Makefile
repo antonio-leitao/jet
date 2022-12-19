@@ -56,9 +56,9 @@ release:
 	NEW="$$major.$$minor.$$patch";\
 	sed -i "" "s/^version = ".*"/version = \"$$NEW\"/" pyproject.toml;\
 	python -m build;\
+	$(MAKE) changelog;\
 	git tag -a $$NEW -m "Release";\
 	git push origin master --tags;\
-	$(MAKE) changelog;\
 	gh release create $$NEW -F CHANGELOG.md;\
 	rm CHANGELOG.md
 
