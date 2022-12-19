@@ -71,7 +71,7 @@ retag:
 	git push origin master --tags
 
 
-changelog:
+changes:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
 	if [[ -z "$$TAG" ]]; then \
 		TAG=`git rev-list --max-parents=0 HEAD`; \
@@ -86,4 +86,26 @@ changelog:
 		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
 		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
 		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
-	done <<- "$$COMMITS"
+	done <<< "$$COMMITS";\
+	echo $$CHANGELOG
+
+changelog:
+	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
+	if [[ -z "$$TAG" ]]; then \
+		TAG=`git rev-list --max-parents=0 HEAD`; \
+	fi; \
+	COMMITS=`git log --oneline $$TAG..HEAD | grep -v -e "Typo" -e "Typos" -e "Bugfix"`; \
+	if [[ -z "$$COMMITS" ]]; then \
+		echo "No new commits since the last tag."; \
+		exit 0; \
+	fi; \
+	CHANGELOG="## Changelog\n\n"; \
+	TEMPFILE=`mktemp`; \
+	echo "$$COMMITS" > "$$TEMPFILE"; \
+	while read -r COMMIT; do \
+		SHA=`echo $$COMMIT | awk '{print $$1}'`; \
+		DESCRIPTION=`echo $$COMMIT | sed 's/^[^ ]* //'`; \
+		CHANGELOG="$$CHANGELOG* $$SHA: $$DESCRIPTION\n"; \
+	done < "$$TEMPFILE"; \
+	rm "$$TEMPFILE";\
+	echo $$CHANGELOG
