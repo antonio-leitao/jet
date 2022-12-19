@@ -7,6 +7,7 @@ help:
 
 init: 
 	@pip install pip-chill 
+	
 clean:
 	@find . -name \*.pyc -delete
 	@find . -type d -name "__pycache__" -delete
@@ -17,9 +18,6 @@ commit:
 	gum confirm --selected.background 31 "Commit changes?" && git commit -m "$$DESCRIPTION"
 	@git push origin master
 
-add:
-	@PACKAGE=$$(gum input --placeholder "Type package name");\
-	echo "installing $$PACKAGE"
 
 changelog:
 	@TAG=`git describe --abbrev=0 --tags 2>/dev/null`; \
