@@ -20,7 +20,7 @@ dependencies = [
 "Homepage" = "https://github.com/Antonio-Leitao/jet"
 
 [project.scripts]
-jet = "jet.main:main"
+jet = "jet_test.main:main"
 
 [tool.setuptools]
 packages = ["jet"]
