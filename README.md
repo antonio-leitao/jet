@@ -7,6 +7,7 @@
 
 [![Downloads](https://pepy.tech/badge/jet-test)](https://pepy.tech/project/jet-test) 
 [![PyPI version](https://badge.fury.io/py/jet-test.svg)](https://pypi.org/project/jet-test/)
+
 JET is a testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, clutter the terminal or ugly to look at.
 
   - [Installation](#installation)
