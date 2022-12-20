@@ -2,21 +2,11 @@
   <img align="center" alt="JET demo" src="assets/banner.png"/>
 </p>
 
+# JET
+<img src='assets/logo.png' width='200px' align="right" style="float:right;margin-left:10pt"></img>
 
 [![Downloads](https://pepy.tech/badge/jet-test)](https://pepy.tech/project/jet-test) 
 [![PyPI version](https://badge.fury.io/py/jet-test.svg)](https://pypi.org/project/jet-test/)
-
-
-<p align="center">
-  <a href="#installation">Installation</a> • 
-  <a href="#usage">Basic Usage</a> •
-  <a href="#mastering-verbostity">Mastering Verbosity</a> •
-  <a href="#custom-fail-conditions">Custom Fail Conditions</a> • 
-  <a href="#further-customizations">Customization</a>
-</p>
-
-# JET
-<img src='assets/logo.png' width='200px' align="right" style="float:right;margin-left:10pt"></img>
 JET is a testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, clutter the terminal or ugly to look at.
 
   - [Installation](#installation)
