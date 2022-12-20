@@ -2,10 +2,10 @@
   <img align="center" alt="JET demo" src="assets/banner.png"/>
 </p>
 
-<p align="center">
+
 [![Downloads](https://pepy.tech/badge/jet-test)](https://pepy.tech/project/jet-test) 
 [![PyPI version](https://badge.fury.io/py/jet-test.svg)](https://pypi.org/project/jet-test/)
-</p>
+
 
 <p align="center">
   <a href="#installation">Installation</a> • 
@@ -30,7 +30,7 @@ JET is a testing library for python aimed at being fast to set up, easy to use a
   <img alt="JET demo" src="assets/one_liner.gif" width="600" />
 </p>
 
-## Installation
+# Installation
 
 > **Note**
 > JET requires [`gum`](https://github.com/charmbracelet/gum) to be installed and available on your `PATH`.
