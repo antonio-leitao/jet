@@ -3,15 +3,18 @@
 </p>
 
 # JET
-<img src='assets/logo.png' width='200px' align="right" style="float:right;margin-left:10pt"></img>
 
 [![Downloads](https://pepy.tech/badge/jet-test)](https://pepy.tech/project/jet-test) 
 [![PyPI version](https://badge.fury.io/py/jet-test.svg)](https://pypi.org/project/jet-test/)
 
+<img src='assets/logo.png' width='200px' align="right" style="float:right;margin-left:10pt"></img>
+
 JET is a testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, clutter the terminal or ugly to look at.
 
+##### Contents
   - [Installation](#installation)
-  - [Basic Usage](#usage)
+  - [Running Tests](#running-tests)
+  - [Reading Reports](#reading-reports)
   - [Mastering Verbosity](#mastering-verbosity)
   - [Custom Fail Conditions](#custom-fail-conditions)
   - [Further Customizations](#further-customizations)
@@ -32,9 +35,7 @@ Best way to install jet is through pip:
 pip install jet-test
 ```
 
-# Usage
-
-### Running Tests
+# Running Tests
 
 ```sh
 jet run <option>
@@ -51,14 +52,52 @@ jet run <option>
 <img alt="JET demo" src="assets/run.gif" width="600" />
 </p>
 
-JET searches for the `tests` folder in your working directory and runs all tests that start with `test_*` from the modules named as: `test_<something>.py`. JET starts by prompting you to choose wich modules to run. You can run all of them by selecting "Run All" or use the [`--all`](#run) flag, check the [`run`](#run) command for more options.
+JET searches for the tests folder in your working directory. You can supply a different directory with the `--dir` flag. Inside it searches for all modules in the form `test_<something>.py` and uses their `__doc__` as description. JET prompts you to choose the modules to run, you can skip this by raising the `--all` flag. You can also specify individual modules by passing them to `--files`. The path of each module is always relative to the specified `--dir`.
 
-### Reading Reports
+```text
+directory
+│   README.md
+└───tests
+│   │   test_array_operations.py
+│   │   test_verbose_levels.py
+|   |   test_custom_fail_conditions.py
+│   
+...
+```
+Inside each module JET runs all functions that start with `test_<something>`. Below is an example test module.
+```python
+""""This is the __doc__ of the test module.
+It will be shown as description in the module choice
+""""
+
+# this function will NOT be considered as a test 
+def set_variables():
+    a = 2
+    b = 1
+    return a,b
+
+# this function will be considered as a test function. 
+def test_sum():
+    """This will be shown if the test succeds"""
+    a,b = set_variables()
+    assert a==b, "this will be shown if the test fails"
+```
+For example the following command will:
+```sh
+jet run --all --dir different_test_folder --files test_user_auth.py test_admin_auth.py --quiet --n-jobs 4 --percentage
+```
+- Skip module selection and run all modules.
+- Run the tests in the modules: `different_test_folder/test_user_auth.py` and `different_test_folder/test_user_auth.py`.
+- Do not display results as it runs, only end summary.
+- Run tests using 4 threads.
+- Show progress as a percentage (x%) instead of a count (x/n).
+
+
+# Reading Reports
 
 ```sh
 jet see <option>
 ```
-
 Specific options for the `see` command:
 
 - `--dir`: Path to tests directory. Defaults to /tests when not supplied.
@@ -70,16 +109,21 @@ Specific options for the `see` command:
 <img alt="JET demo" src="assets/see.gif" width="600" />
 </p>
 
-All tests that did not conclude with a "pass" can be further inspected. To see a detailed report including, captured standard output, local variables, source code and error description run the `see` command. The report is colapsable as to display as much information as possible without cluttering your terminal.
+All tests that did not pass can be further inspected. The `see` command prompts the user to choose one of the failed tests and provides a collapsable report that displays:
+- Error name: Failed / ErrorType / WarningType / <Customizatble> 
+- Expected behaviour: User defined test `__doc__`
+- Captured output: all output printed during the test runtime (`print()`)
+- Test name @ test module: along with test source code highlighting error line.
+- Local variables: value of test local variables at the time of failure. 
+
+You can press `q` to close the collapsable report as to not clutter your terminal.
 
 # Mastering Verbosity
 
-### Test Routines
-
 JET displays the result of each test after it has been run, unless the `--quiet` flag is raised.
 
-- **if it passes** : It displays the tests's `doc`. If no `doc` is available, it shows the test's name.
-- **else** : Display's the error/warning/failing condition description. If no description is provided, it shows the `doc` or name of test. This behaviour is specially usefull of a test has more than one failing condition, for example:
+- **PASS**: Displays the tests's `__doc__`. If no `__doc__` is available, it shows the test's `__name__`.
+- **FAIL**: Displays the error description. This behaviour is specially usefull of a test has more than one failing condition, for example:
 
 ```python
 #tests have to start with test_
@@ -95,24 +139,15 @@ def test_example():
 <img alt="JET demo" src="assets/verbosity.gif" width="600" />
 </p>
 
-### Test Modules
-
-JET searches for modules named: `test_<something>.py` in the `tests/` directory (for a different directory use [`--dir`](#running-tests)). When prompting the user JET will display "Seomthing" as the module title and the module `__doc__` as the description. The descripiton will be blank if JET otherwise. For creating a `__doc__` for a python module add:
-
-```python
-"""This is a module documentation.
-It should be the first line in any python module
-"""
-
-#defines all tests below
-def test_whatever():...
-```
-
 # Custom Fail Conditions
 
-Suppose you want a test to fail if it's running time exceeds 0.5 seconds. We do that by creating a wrapper that raises a custom error when the condition is failed.
+Suppose you want a test to fail if its' running time exceeds 0.5 seconds. We do that by creating a wrapper that raises a custom error when the condition is failed.
 
 ```python
+import timeit
+import time
+from functools import wraps
+
 def timebounded(test_function):
     """Example wrapper for a custom suport.
     Throws an error if the wrapped function exceeds a certain amount of time to run"""
@@ -127,7 +162,7 @@ def timebounded(test_function):
 
     return wrappee
 
-
+# Just wrap wahtever tests you want with the timebounded function and you're good to go.
 @timebounded
 def test_timings_of_calculation():
     """The function should not exeed 0.5 seconds."""
