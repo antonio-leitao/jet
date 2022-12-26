@@ -110,7 +110,7 @@ Specific options for the `see` command:
 </p>
 
 All tests that did not pass can be further inspected. The `see` command prompts the user to choose one of the failed tests and provides a collapsable report that displays:
-- Error name: Failed / ErrorType / WarningType / <Customizatble> 
+- Error name: Failed / ErrorType / WarningType / {Customizable}
 - Expected behaviour: User defined test `__doc__`
 - Captured output: all output printed during the test runtime (`print()`)
 - Test name @ test module: along with test source code highlighting error line.
