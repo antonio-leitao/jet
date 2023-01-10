@@ -193,3 +193,6 @@ jet <option> <command>
 <p align="center">
 <img alt="JET demo" src="assets/colors.gif" width="600" />
 </p>
+
+## Contributors
+![GitHub Contributors Image](https://contrib.rocks/image?repo=antonio-leitao/jet)
