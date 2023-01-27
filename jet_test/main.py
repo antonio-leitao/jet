@@ -18,7 +18,7 @@ from jet_test.classes import JetConfig, RunConfig, SeeConfig
 # dependencies
 from rich.console import Console
 
-__version__ = importlib.metadata.version("jet")
+__version__ = importlib.metadata.version("jet-test")
 
 
 def add_run_subparser(subparsers):
