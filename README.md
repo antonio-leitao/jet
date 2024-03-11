@@ -1,13 +1,18 @@
 <p align="center">
-  <img align="center" alt="JET demo" src="assets/banner.png"/>
+  <img src='assets/logo.svg' width='200px' align="center"></img>
 </p>
 
-# JET
+<div align="center">
+<h3 max-width='200px' align="center">Jet</h3>
+  <p><i>Minimal testing library for Python<br/>
+  Aesthetics oriented<br/>
+  No steup required</i><br/></p>
+  <p>
+<img alt="Pepy Total Downlods" src="https://img.shields.io/pepy/dt/jet-test?style=for-the-badge&logo=python&labelColor=white&color=blue">
+  </p>
+</div>
 
-[![Downloads](https://pepy.tech/badge/jet-test)](https://pepy.tech/project/jet-test) 
-[![PyPI version](https://badge.fury.io/py/jet-test.svg)](https://pypi.org/project/jet-test/)
-
-<img src='assets/logo.png' width='200px' align="right" style="float:right;margin-left:10pt"></img>
+#
 
 JET is a testing library for python aimed at being fast to set up, easy to use and above all pleasing to the eye. Because testing does not have to be a chore to set up, clutter the terminal or ugly to look at.
 
